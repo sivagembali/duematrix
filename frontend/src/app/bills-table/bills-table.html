@@ -1,0 +1,142 @@
+<div class="bills-container">
+  <!-- Header -->
+  <p-card>
+    <ng-template pTemplate="header">
+      <div class="flex justify-content-between align-items-center p-3">
+        <h2 class="m-0">
+          <i class="pi pi-credit-card mr-2"></i>
+          Credit Bills Management
+        </h2>
+        <p-button 
+          icon="pi pi-refresh" 
+          (click)="loadBills()" 
+          [loading]="loading()"
+          severity="secondary">
+        </p-button>
+      </div>
+    </ng-template>
+
+    <!-- Toolbar with Filters -->
+    <p-toolbar styleClass="mb-4 gap-2">
+      <ng-template pTemplate="start">
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input 
+            pInputText 
+            type="text" 
+            (input)="dt.filterGlobal($event.target.value, 'contains')"
+            placeholder="Search by bill no, mobile, bank..."
+            class="w-20rem"
+          />
+        </span>
+        
+        <p-dropdown 
+          [options]="statusOptions" 
+          [(ngModel)]="selectedStatus"
+          placeholder="Filter by Status"
+          [showClear]="true"
+          styleClass="ml-2">
+        </p-dropdown>
+      </ng-template>
+    </p-toolbar>
+
+    <!-- PrimeNG Data Table -->
+    <p-table 
+      #dt
+      [value]="bills()" 
+      [loading]="loading()"
+      [paginator]="true" 
+      [rows]="10"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [globalFilterFields]="['bill_no', 'mobile', 'bank_name']"
+      dataKey="id"
+      styleClass="p-datatable-gridlines">
+      
+      <!-- Table Header -->
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="s_no">
+            S.No <p-sortIcon field="s_no"></p-sortIcon>
+          </th>
+          <th pSortableColumn="card_no">
+            Card Number <p-sortIcon field="card_no"></p-sortIcon>
+          </th>
+          <th pSortableColumn="cum_name">
+            Customer Name <p-sortIcon field="cum_name"></p-sortIcon>
+          </th>
+          <th pSortableColumn="card_limit">
+            Card Limit <p-sortIcon field="card_limit"></p-sortIcon>
+          </th>
+          <th pSortableColumn="tad">
+            TAD <p-sortIcon field="tad"></p-sortIcon>
+          </th>
+          <th pSortableColumn="payment_status">
+            Status <p-sortIcon field="payment_status"></p-sortIcon>
+          </th>
+          <th>Mobile</th>
+          <th pSortableColumn="bank_name">
+            Bank <p-sortIcon field="bank_name"></p-sortIcon>
+          </th>
+          <th pSortableColumn="manager">
+            Manager <p-sortIcon field="manager"></p-sortIcon>
+          </th>
+          <th>Areas</th>
+        </tr>
+      </ng-template>
+
+      <!-- Table Body -->
+      <ng-template pTemplate="body" let-bill>
+        <tr>
+          <td>
+            <span class="font-semibold">{{bill.s_no}}</span>
+          </td>
+          <td>
+            <span class="font-mono text-sm">{{bill.card_no}}</span>
+          </td>
+          <td>
+            <span class="font-medium">{{bill.cum_name}}</span>
+          </td>
+          <td>
+            <span class="font-semibold">{{formatCurrency(bill.card_limit)}}</span>
+          </td>
+          <td>
+            <span class="font-semibold">{{formatCurrency(bill.tad)}}</span>
+          </td>
+          <td>
+            <p-tag 
+              [value]="bill.payment_status" 
+              [severity]="getSeverity(bill.payment_status)">
+            </p-tag>
+          </td>
+          <td>
+            <a [href]="'tel:' + bill.mobile" class="text-primary no-underline hover:underline">
+              {{bill.mobile}}
+            </a>
+          </td>
+          <td>
+            <span class="inline-flex align-items-center gap-2">
+              <span class="font-semibold">{{bill.bank_name}}</span>
+            </span>
+          </td>
+          <td>{{bill.manager}}</td>
+          <td>{{bill.areas}}</td>
+        </tr>
+      </ng-template>
+
+      <!-- Empty Message -->
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="10" class="text-center py-4">
+            <div class="flex flex-column align-items-center">
+              <i class="pi pi-info-circle text-4xl text-500 mb-2"></i>
+              <p class="text-500">No bills found matching your criteria</p>
+              <p class="text-400 text-sm">Try adjusting your search or filters</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+</div>

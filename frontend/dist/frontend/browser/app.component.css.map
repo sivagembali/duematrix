@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["angular:styles/component:css;a96d5a8aabc0cb338d0b26caf600e10631ae7f0a3efb7d29b4d70e1c116dfb64;C:/Users/ssiva/Mahesh/frontend/src/app/app.component.ts"],
+  "sourcesContent": ["\n    .app-container {\n      min-height: 100vh;\n      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n      padding: 2rem;\n    }\n\n    .app-header {\n      text-align: center;\n      color: white;\n      margin-bottom: 2rem;\n    }\n\n    .app-header h1 {\n      font-size: 2.5rem;\n      margin: 0 0 0.5rem 0;\n      font-weight: 600;\n    }\n\n    .app-header p {\n      font-size: 1.2rem;\n      margin: 0;\n      opacity: 0.9;\n    }\n\n    .app-main {\n      max-width: 1200px;\n      margin: 0 auto;\n    }\n\n    @media (max-width: 768px) {\n      .app-container {\n        padding: 1rem;\n      }\n      \n      .app-header h1 {\n        font-size: 2rem;\n      }\n      \n      .app-header p {\n        font-size: 1rem;\n      }\n    }\n  "],
+  "mappings": ";AACI,CAAC;AACC,cAAY;AACZ;AAAA,IAAY;AAAA,MAAgB,MAAhB;AAAA,MAAwB,QAAQ,EAAhC;AAAA,MAAoC,QAAQ;AACxD,WAAS;AACX;AAEA,CAAC;AACC,cAAY;AACZ,SAAO;AACP,iBAAe;AACjB;AAEA,CANC,WAMW;AACV,aAAW;AACX,UAAQ,EAAE,EAAE,OAAO;AACnB,eAAa;AACf;AAEA,CAZC,WAYW;AACV,aAAW;AACX,UAAQ;AACR,WAAS;AACX;AAEA,CAAC;AACC,aAAW;AACX,UAAQ,EAAE;AACZ;AAEA,OAAO,CAAC,SAAS,EAAE;AACjB,GA9BD;AA+BG,aAAS;AACX;AAEA,GA5BD,WA4Ba;AACV,eAAW;AACb;AAEA,GAhCD,WAgCa;AACV,eAAW;AACb;AACF;",
+  "names": []
+}
