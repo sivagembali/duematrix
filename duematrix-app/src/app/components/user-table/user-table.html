@@ -1,38 +1,36 @@
 <div class="card">
   <h2>Data Matrix - 100 Records with 50 Columns</h2>
   
-  <div class="controls-row">
-    <div class="column-selector">
-      <label for="columnSelect">Select Columns to Display:</label>
-      <p-multiselect 
-        inputId="columnSelect"
-        [options]="availableColumns" 
-        [(ngModel)]="selectedColumns"
-        optionLabel="col_label"
-        placeholder="Choose columns"
-        [showToggleAll]="true"
-        (onChange)="onColumnSelectionChange()"
-        [style]="{'width': '100%', 'min-width': '400px'}">
-      </p-multiselect>
-    </div>
-  </div>
-
   <div class="table-info">
     <p><strong>Total Records:</strong> {{ dataset.length }}</p>
     <p><strong>Filtered Records:</strong> {{ filteredDataset.length }}</p>
     <p><strong>Edited Records:</strong> <span [class.has-changes]="editedRecords.size > 0">{{ editedRecords.size }}</span></p>
     <p><strong>Total Columns:</strong> {{ columnHeaders.length }}</p>
     <p><strong>Displayed Columns:</strong> {{ displayedColumns.length }}</p>
-    <div class="action-buttons-info">
-      <p-button 
-        icon="pi pi-download" 
-        severity="success"
-        size="small"
-        [rounded]="true"
-        title="Download Filtered Data"
-        (onClick)="exportFilteredDataAsCSV()"
-        [disabled]="filteredDataset.length === 0">
-      </p-button>
+    <div class="controls-inline">
+      <div class="column-selector">
+        <label for="columnSelect">Select Columns:</label>
+        <p-multiselect 
+          inputId="columnSelect"
+          [options]="availableColumns" 
+          [(ngModel)]="selectedColumns"
+          optionLabel="col_label"
+          placeholder="Choose columns"
+          [showToggleAll]="true"
+          (onChange)="onColumnSelectionChange()">
+        </p-multiselect>
+      </div>
+      <div class="action-buttons-info">
+        <p-button 
+          icon="pi pi-download" 
+          severity="secondary"
+          size="small"
+          [rounded]="true"
+          title="Download Filtered Data"
+          (onClick)="exportFilteredDataAsCSV()"
+          [disabled]="filteredDataset.length === 0">
+        </p-button>
+      </div>
     </div>
   </div>
 

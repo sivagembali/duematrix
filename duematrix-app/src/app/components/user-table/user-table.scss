@@ -7,71 +7,6 @@
   max-width: calc(100vw - 4rem);
 }
 
-.controls-row {
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-end;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.column-selector {
-  flex: 1;
-  max-width: 600px;
-  padding: 1rem;
-  background: #f8f9fa;
-  border-radius: 6px;
-  border: 1px solid #e9ecef;
-
-  label {
-    display: block;
-    font-weight: 600;
-    color: #495057;
-    margin-bottom: 0.5rem;
-    font-size: 0.95rem;
-  }
-
-  ::ng-deep .p-multiselect {
-    .p-multiselect-panel {
-      max-height: 400px;
-      
-      .p-multiselect-header {
-        padding: 0.75rem;
-        border-bottom: 1px solid #dee2e6;
-        background: #fff;
-      }
-
-      .p-multiselect-items-wrapper {
-        max-height: 350px;
-      }
-    }
-  }
-}
-
-.action-buttons {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-
-  ::ng-deep .p-button {
-    &.p-button-success {
-      background: #22c55e;
-      border-color: #22c55e;
-
-      &:hover:not(:disabled) {
-        background: #16a34a;
-        border-color: #16a34a;
-      }
-
-      &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-    }
-  }
-}
-
 h2 {
   color: #333;
   margin-bottom: 1rem;
@@ -101,20 +36,59 @@ h2 {
     }
   }
 
-  .action-buttons-info {
+  .controls-inline {
     margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+}
+
+.column-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+
+  label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
+  ::ng-deep .p-multiselect {
+    min-width: 200px;
+    
+    .p-multiselect-panel {
+      max-height: 400px;
+      
+      .p-multiselect-header {
+        padding: 0.75rem;
+        border-bottom: 1px solid #dee2e6;
+        background: #fff;
+      }
+
+      .p-multiselect-items-wrapper {
+        max-height: 350px;
+      }
+    }
   }
 }
 
 .action-buttons-info {
   ::ng-deep .p-button {
-    &.p-button-success {
-      background: #22c55e;
-      border-color: #22c55e;
+    &.p-button-secondary {
+      background: #333;
+      border-color: #333;
+      color: white;
 
       &:hover:not(:disabled) {
-        background: #16a34a;
-        border-color: #16a34a;
+        background: #000;
+        border-color: #000;
       }
 
       &:disabled {
