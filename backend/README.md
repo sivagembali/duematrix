@@ -1,23 +1,49 @@
 # DueMatrix Backend API
 
-Flask-based REST API with PostgreSQL database using SQLAlchemy ORM and MVC architecture.
+Flask-based REST API with PostgreSQL database, JWT authentication, SQLAlchemy ORM, and MVC architecture.
+
+## Features
+
+- ✅ RESTful API with Flask
+- ✅ PostgreSQL database with SQLAlchemy ORM
+- ✅ JWT-based authentication with Flask-JWT-Extended
+- ✅ Password hashing with bcrypt
+- ✅ Database migrations with Flask-Migrate
+- ✅ CORS support for Angular frontend
+- ✅ MVC architecture pattern
+- ✅ User authentication and authorization
+- ✅ Column header configuration management
 
 ## Project Structure
 
 ```
 backend/
-├── app.py                  # Application entry point
-├── config.py              # Configuration settings
-├── requirements.txt       # Python dependencies
-├── .env                   # Environment variables (not in git)
-├── models/               # Database models (M in MVC)
+├── app.py                      # Application entry point with JWT & Bcrypt
+├── config.py                   # Configuration settings with JWT config
+├── requirements.txt            # Python dependencies
+├── .env                        # Environment variables (not in git)
+├── AUTH_API.md                # Authentication API documentation
+├── models/                    # Database models (M in MVC)
 │   ├── __init__.py
-│   └── header_model.py   # ColumnHeader model
-├── controllers/          # Route handlers (C in MVC)
+│   ├── user_model.py          # User model for authentication
+│   └── header_model.py        # ColumnHeader model
+├── controllers/               # Route handlers (C in MVC)
 │   ├── __init__.py
-│   └── header_controller.py
-└── migrations/           # Database migrations (auto-generated)
+│   ├── auth_controller.py     # Authentication endpoints
+│   └── header_controller.py   # Column header endpoints
+└── migrations/                # Database migrations (auto-generated)
 ```
+
+## Tech Stack
+
+- **Flask 3.0.0** - Web framework
+- **Flask-SQLAlchemy 3.1.1** - ORM
+- **Flask-JWT-Extended 4.6.0** - JWT authentication
+- **Flask-Bcrypt 1.0.1** - Password hashing
+- **Flask-CORS 4.0.0** - Cross-origin support
+- **Flask-Migrate 4.0.5** - Database migrations
+- **PostgreSQL** - Database
+- **psycopg2-binary 2.9.7** - PostgreSQL adapter
 
 ## Setup Instructions
 
@@ -43,15 +69,43 @@ Make sure PostgreSQL is running and create the database:
 CREATE DATABASE duematrix;
 ```
 
-### 4. Initialize Database Migrations
+### 4. Environment Configuration
+
+The `.env` file should contain:
+
+```env
+# Database Configuration
+DB_TYPE=postgresql
+DB_USERNAME=postgres
+DB_PASSWORD=root
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=duematrix
+
+# Flask Configuration
+FLASK_APP=app.py
+FLASK_ENV=development
+SECRET_KEY=your-secret-key-here-change-in-production
+
+# JWT Configuration
+JWT_SECRET_KEY=your-jwt-secret-key-change-in-production
+JWT_ACCESS_TOKEN_EXPIRES=3600
+JWT_REFRESH_TOKEN_EXPIRES=2592000
+
+# CORS Configuration
+CORS_ORIGINS=http://localhost:4200
+```
+
+**Important:** Change `SECRET_KEY` and `JWT_SECRET_KEY` in production!
+
+### 5. Initialize Database Migrations
 
 ```powershell
-flask db init
-flask db migrate -m "Initial migration"
+flask db migrate -m "Initial migration with User model"
 flask db upgrade
 ```
 
-### 5. Run the Application
+### 6. Run the Application
 
 ```powershell
 python app.py
@@ -67,7 +121,18 @@ The API will be available at `http://localhost:5000`
 
 ## API Endpoints
 
-### Column Headers API
+### Authentication APIs (`/api/auth`)
+
+📖 **See [AUTH_API.md](AUTH_API.md) for detailed authentication documentation**
+
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - Login user  
+- `POST /api/auth/refresh` - Refresh access token
+- `GET /api/auth/me` - Get current user (requires JWT)
+- `PUT /api/auth/change-password` - Change password (requires JWT)
+- `POST /api/auth/logout` - Logout user (requires JWT)
+
+### Column Headers API (`/api`)
 
 #### Get All Headers
 ```

@@ -1,5 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager
+from flask_bcrypt import Bcrypt
 from config import config
 from models import db
 from flask_migrate import Migrate
@@ -18,10 +20,15 @@ def create_app(config_name=None):
     db.init_app(app)
     CORS(app, resources={r"/api/*": {"origins": app.config['CORS_ORIGINS']}})
     Migrate(app, db)
+    JWTManager(app)
+    Bcrypt(app)
     
     # Register blueprints
     from controllers.header_controller import header_bp
+    from controllers.auth_controller import auth_bp
+    
     app.register_blueprint(header_bp, url_prefix='/api')
+    app.register_blueprint(auth_bp, url_prefix='/api/auth')
     
     # Create tables
     with app.app_context():
