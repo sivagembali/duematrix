@@ -1,0 +1,153 @@
+# ============================================
+# Combined .gitignore for Angular + Flask
+# ============================================
+
+# ============================================
+# ANGULAR FRONTEND
+# ============================================
+
+# Dependencies
+duematrix-app/node_modules/
+duematrix-app/npm-debug.log*
+duematrix-app/yarn-error.log*
+duematrix-app/yarn.lock
+duematrix-app/package-lock.json
+
+# Build outputs
+duematrix-app/dist/
+duematrix-app/.angular/
+duematrix-app/out-tsc/
+duematrix-app/tmp/
+duematrix-app/build/
+
+# IDEs and editors
+duematrix-app/.idea/
+duematrix-app/.project
+duematrix-app/.classpath
+duematrix-app/.c9/
+duematrix-app/*.launch
+duematrix-app/.settings/
+duematrix-app/*.sublime-workspace
+duematrix-app/.vscode/*
+!duematrix-app/.vscode/settings.json
+!duematrix-app/.vscode/tasks.json
+!duematrix-app/.vscode/launch.json
+!duematrix-app/.vscode/extensions.json
+
+# System files
+duematrix-app/.DS_Store
+duematrix-app/Thumbs.db
+
+# ============================================
+# FLASK BACKEND
+# ============================================
+
+# Python
+backend/__pycache__/
+backend/*.py[cod]
+backend/*$py.class
+backend/*.so
+backend/.Python
+backend/build/
+backend/develop-eggs/
+backend/dist/
+backend/downloads/
+backend/eggs/
+backend/.eggs/
+backend/lib/
+backend/lib64/
+backend/parts/
+backend/sdist/
+backend/var/
+backend/wheels/
+backend/*.egg-info/
+backend/.installed.cfg
+backend/*.egg
+backend/MANIFEST
+
+# Virtual Environment
+backend/venv/
+backend/env/
+backend/ENV/
+backend/.venv/
+
+# Flask
+backend/instance/
+backend/.webassets-cache
+
+# Environment variables
+backend/.env
+backend/.env.local
+backend/.env.*.local
+
+# Database
+backend/*.db
+backend/*.sqlite
+backend/*.sqlite3
+
+# Logs
+backend/*.log
+backend/logs/
+
+# Flask-Migrate
+backend/migrations/versions/*.pyc
+
+# PyCharm
+backend/.idea/
+
+# VS Code
+backend/.vscode/
+
+# ============================================
+# GLOBAL / SHARED
+# ============================================
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/
+
+# IDE - IntelliJ / WebStorm
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Test coverage
+coverage/
+*.lcov
+.nyc_output/
+
+# Environment variables (root level)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
