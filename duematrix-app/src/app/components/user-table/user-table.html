@@ -4,6 +4,7 @@
   <div class="table-info">
     <p><strong>Total Records:</strong> {{ dataset.length }}</p>
     <p><strong>Filtered Records:</strong> {{ filteredDataset.length }}</p>
+    <p><strong>Edited Records:</strong> <span [class.has-changes]="editedRecords.size > 0">{{ editedRecords.size }}</span></p>
     <p><strong>Total Columns:</strong> {{ columnHeaders.length }}</p>
     <p><strong>Displayed Columns:</strong> {{ displayedColumns.length }}</p>
     <p><strong>Tip:</strong> Use filters in header row to filter data. Click editable cells to edit.</p>
@@ -15,7 +16,7 @@
     scrollHeight="600px"
     scrollDirection="both"
     [frozenColumns]="displayedColumns.slice(0, 1)"
-    [tableStyle]="{ 'min-width': '200rem' }"
+    [tableStyle]="{ 'min-width': '200rem', 'min-height': '400px' }"
     styleClass="p-datatable-striped p-datatable-gridlines"
     dataKey="id">
     

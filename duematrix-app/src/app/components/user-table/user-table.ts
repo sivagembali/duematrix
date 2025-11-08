@@ -4,12 +4,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { ButtonModule } from 'primeng/button';
 import { ColumnHeader, DataRow } from '../../models/data.model';
 import { MockDataGenerator } from '../../services/mock-data.service';
 
 @Component({
   selector: 'app-user-table',
-  imports: [CommonModule, TableModule, FormsModule, InputTextModule, MultiSelectModule],
+  imports: [CommonModule, TableModule, FormsModule, InputTextModule, MultiSelectModule, ButtonModule],
   templateUrl: './user-table.html',
   styleUrl: './user-table.scss',
 })
@@ -21,6 +22,11 @@ export class UserTable implements OnInit {
   selectedFilters: { [key: string]: string[] } = {};
   filterValues: { [key: string]: string } = {};
   filteredDataset: DataRow[] = [];
+  
+  // Track edited records
+  editedRecords: Map<string, DataRow> = new Map(); // key: id, value: edited row data
+  originalRecords: Map<string, DataRow> = new Map(); // key: id, value: original row data
+  clonedRows: { [key: string]: DataRow } = {}; // For edit mode cloning
 
   ngOnInit() {
     // Generate 100 records with 50 columns
@@ -42,6 +48,11 @@ export class UserTable implements OnInit {
       } else {
         this.filterValues[col.col_header] = '';
       }
+    });
+
+    // Store original records for comparison
+    this.dataset.forEach(row => {
+      this.originalRecords.set(row['id'].toString(), { ...row });
     });
 
     this.filteredDataset = [...this.dataset];
@@ -108,14 +119,136 @@ export class UserTable implements OnInit {
   }
 
   onRowEditInit(row: DataRow) {
+    const rowId = row['id'].toString();
+    // Clone the row data before editing
+    this.clonedRows[rowId] = { ...row };
     console.log('Edit started for row:', row);
   }
 
   onRowEditSave(row: DataRow) {
-    console.log('Row saved:', row);
+    const rowId = row['id'].toString();
+    const originalRow = this.originalRecords.get(rowId);
+    
+    if (originalRow) {
+      // Check if any field has changed
+      let hasChanges = false;
+      for (const key in row) {
+        if (row[key] !== originalRow[key]) {
+          hasChanges = true;
+          break;
+        }
+      }
+      
+      if (hasChanges) {
+        // Store the edited record
+        this.editedRecords.set(rowId, { ...row });
+        console.log('Row saved with changes:', row);
+        console.log('Total edited records:', this.editedRecords.size);
+        console.log('All edited records:', Array.from(this.editedRecords.values()));
+      } else {
+        // No changes, remove from edited records if it was there
+        this.editedRecords.delete(rowId);
+        console.log('Row saved without changes:', row);
+      }
+    }
+    
+    // Clean up cloned row
+    delete this.clonedRows[rowId];
   }
 
   onRowEditCancel(row: DataRow, index: number) {
+    const rowId = row['id'].toString();
+    
+    // Restore the original values from clone
+    if (this.clonedRows[rowId]) {
+      Object.assign(row, this.clonedRows[rowId]);
+      delete this.clonedRows[rowId];
+    }
+    
     console.log('Edit cancelled for row:', row);
+  }
+
+  // Get all edited records ready for database save
+  getEditedRecordsForSave(): DataRow[] {
+    return Array.from(this.editedRecords.values());
+  }
+
+  // Get edited records with their changes (delta)
+  getEditedRecordsWithChanges(): Array<{ id: string, original: DataRow, edited: DataRow, changes: any }> {
+    const editedWithChanges: Array<{ id: string, original: DataRow, edited: DataRow, changes: any }> = [];
+    
+    this.editedRecords.forEach((editedRow, id) => {
+      const originalRow = this.originalRecords.get(id);
+      if (originalRow) {
+        const changes: any = {};
+        for (const key in editedRow) {
+          if (editedRow[key] !== originalRow[key]) {
+            changes[key] = {
+              old: originalRow[key],
+              new: editedRow[key]
+            };
+          }
+        }
+        
+        editedWithChanges.push({
+          id,
+          original: originalRow,
+          edited: editedRow,
+          changes
+        });
+      }
+    });
+    
+    return editedWithChanges;
+  }
+
+  // Clear all tracked edits
+  clearEditedRecords() {
+    this.editedRecords.clear();
+    console.log('All edited records cleared');
+  }
+
+  // Check if there are unsaved changes
+  hasUnsavedChanges(): boolean {
+    return this.editedRecords.size > 0;
+  }
+
+  // Show edited records in console (can be replaced with dialog)
+  showEditedRecords() {
+    const editedWithChanges = this.getEditedRecordsWithChanges();
+    console.log('=== EDITED RECORDS READY FOR DATABASE ===');
+    console.log('Total edited records:', this.editedRecords.size);
+    console.log('\nFull edited records:', this.getEditedRecordsForSave());
+    console.log('\nChanges details:', editedWithChanges);
+    
+    // You can replace this with a dialog/modal display
+    alert(`Total edited records: ${this.editedRecords.size}\n\nCheck console for details.`);
+  }
+
+  // Export edited records as JSON (ready for API call)
+  exportEditedRecords() {
+    const editedRecords = this.getEditedRecordsForSave();
+    const editedWithChanges = this.getEditedRecordsWithChanges();
+    
+    const dataToExport = {
+      editedRecords,
+      changesDetails: editedWithChanges,
+      timestamp: new Date().toISOString(),
+      totalChanges: this.editedRecords.size
+    };
+    
+    console.log('=== EXPORTED DATA FOR DATABASE ===');
+    console.log(JSON.stringify(dataToExport, null, 2));
+    
+    // Download as JSON file
+    const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `edited-records-${new Date().getTime()}.json`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    
+    alert(`Exported ${this.editedRecords.size} edited records to JSON file.`);
   }
 }
