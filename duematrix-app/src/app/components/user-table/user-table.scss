@@ -7,8 +7,18 @@
   max-width: calc(100vw - 4rem);
 }
 
-.column-selector {
+.controls-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  gap: 1.5rem;
   margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.column-selector {
+  flex: 1;
+  max-width: 600px;
   padding: 1rem;
   background: #f8f9fa;
   border-radius: 6px;
@@ -39,22 +49,26 @@
   }
 }
 
-.header-section {
+.action-buttons {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
   gap: 1rem;
+  align-items: center;
 
-  h2 {
-    margin: 0;
-  }
+  ::ng-deep .p-button {
+    &.p-button-success {
+      background: #22c55e;
+      border-color: #22c55e;
 
-  .action-buttons {
-    display: flex;
-    gap: 0.75rem;
-    align-items: center;
+      &:hover:not(:disabled) {
+        background: #16a34a;
+        border-color: #16a34a;
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
   }
 }
 
@@ -70,6 +84,7 @@ h2 {
   padding: 1rem;
   background: #f8f9fa;
   border-radius: 4px;
+  align-items: center;
 
   p {
     margin: 0;
@@ -83,6 +98,29 @@ h2 {
     .has-changes {
       color: #f59e0b;
       font-weight: 700;
+    }
+  }
+
+  .action-buttons-info {
+    margin-left: auto;
+  }
+}
+
+.action-buttons-info {
+  ::ng-deep .p-button {
+    &.p-button-success {
+      background: #22c55e;
+      border-color: #22c55e;
+
+      &:hover:not(:disabled) {
+        background: #16a34a;
+        border-color: #16a34a;
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
     }
   }
 }

@@ -278,4 +278,48 @@ export class UserTable implements OnInit {
     
     alert(`Exported ${this.editedRecords.size} edited records to JSON file.`);
   }
+
+  // Export filtered data as CSV
+  exportFilteredDataAsCSV() {
+    if (this.filteredDataset.length === 0) {
+      alert('No data to export. Please adjust your filters.');
+      return;
+    }
+
+    // Get displayed column headers
+    const headers = this.displayedColumns.map(col => col.col_label);
+    const headerKeys = this.displayedColumns.map(col => col.col_header);
+
+    // Create CSV content
+    let csvContent = headers.join(',') + '\n';
+
+    // Add data rows
+    this.filteredDataset.forEach(row => {
+      const rowData = headerKeys.map(key => {
+        const value = row[key];
+        // Handle values that contain commas, quotes, or newlines
+        if (value === null || value === undefined) {
+          return '';
+        }
+        const stringValue = String(value);
+        if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+          // Escape quotes and wrap in quotes
+          return `"${stringValue.replace(/"/g, '""')}"`;
+        }
+        return stringValue;
+      });
+      csvContent += rowData.join(',') + '\n';
+    });
+
+    // Create and download CSV file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `filtered-data-${new Date().getTime()}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+
+    console.log(`Exported ${this.filteredDataset.length} filtered records to CSV`);
+  }
 }

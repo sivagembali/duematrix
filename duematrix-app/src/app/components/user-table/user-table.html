@@ -1,18 +1,20 @@
 <div class="card">
   <h2>Data Matrix - 100 Records with 50 Columns</h2>
   
-  <div class="column-selector">
-    <label for="columnSelect">Select Columns to Display:</label>
-    <p-multiselect 
-      inputId="columnSelect"
-      [options]="availableColumns" 
-      [(ngModel)]="selectedColumns"
-      optionLabel="col_label"
-      placeholder="Choose columns"
-      [showToggleAll]="true"
-      (onChange)="onColumnSelectionChange()"
-      [style]="{'width': '100%', 'max-width': '600px'}">
-    </p-multiselect>
+  <div class="controls-row">
+    <div class="column-selector">
+      <label for="columnSelect">Select Columns to Display:</label>
+      <p-multiselect 
+        inputId="columnSelect"
+        [options]="availableColumns" 
+        [(ngModel)]="selectedColumns"
+        optionLabel="col_label"
+        placeholder="Choose columns"
+        [showToggleAll]="true"
+        (onChange)="onColumnSelectionChange()"
+        [style]="{'width': '100%', 'min-width': '400px'}">
+      </p-multiselect>
+    </div>
   </div>
 
   <div class="table-info">
@@ -21,7 +23,17 @@
     <p><strong>Edited Records:</strong> <span [class.has-changes]="editedRecords.size > 0">{{ editedRecords.size }}</span></p>
     <p><strong>Total Columns:</strong> {{ columnHeaders.length }}</p>
     <p><strong>Displayed Columns:</strong> {{ displayedColumns.length }}</p>
-    <p><strong>Tip:</strong> Use filters in header row to filter data. Click editable cells to edit.</p>
+    <div class="action-buttons-info">
+      <p-button 
+        icon="pi pi-download" 
+        severity="success"
+        size="small"
+        [rounded]="true"
+        title="Download Filtered Data"
+        (onClick)="exportFilteredDataAsCSV()"
+        [disabled]="filteredDataset.length === 0">
+      </p-button>
+    </div>
   </div>
 
   <p-table 
