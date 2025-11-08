@@ -106,15 +106,25 @@ h2 {
 
     .p-datatable-wrapper {
       min-height: 600px !important;
+      position: relative !important;
     }
 
     .p-datatable-scrollable-wrapper {
       min-height: 600px !important;
     }
 
+    .p-datatable-scrollable-header {
+      z-index: 100 !important;
+      position: sticky !important;
+      top: 0 !important;
+      background: white !important;
+    }
+
     .p-datatable-scrollable-body {
       min-height: 500px !important;
       height: 600px !important;
+      z-index: 1 !important;
+      position: relative !important;
     }
 
     .p-datatable-scrollable-view {
@@ -123,6 +133,14 @@ h2 {
 
     .p-datatable-tbody {
       min-height: 500px !important;
+    }
+
+    .p-datatable-scrollable-header-table {
+      z-index: 100 !important;
+    }
+
+    .p-datatable-scrollable-body-table {
+      z-index: 1 !important;
     }
 
     .p-datatable-thead > tr > th {
@@ -197,13 +215,94 @@ h2 {
       }
     }
 
+    // Multiselect dropdown panels - need very high z-index
+    .p-multiselect-panel {
+      z-index: 9999 !important;
+    }
+
     // Frozen column styling
+    .frozen-column {
+      position: sticky !important;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    // Scrollable header - contains the frozen headers
+    .p-datatable-scrollable-header {
+      z-index: 500 !important;
+      position: relative !important;
+      
+      .frozen-column {
+        z-index: 5000 !important;
+        position: sticky !important;
+      }
+      
+      thead tr th.frozen-column {
+        z-index: 5000 !important;
+      }
+    }
+
+    // Header frozen columns need MUCH higher z-index to stay above everything
+    // First header row (labels) - frozen columns
+    thead tr:first-child th.frozen-column {
+      z-index: 5000 !important;
+      background: #667eea !important;
+      color: white !important;
+      position: sticky !important;
+      
+      &.primary-key {
+        background: #764ba2 !important;
+      }
+      
+      &.editable {
+        background: #4f46e5 !important;
+      }
+    }
+
+    // Second header row (filters) - frozen columns
+    thead tr:nth-child(2) th.frozen-column {
+      z-index: 5000 !important;
+      background: #f8f9fa !important;
+      position: sticky !important;
+    }
+
+    // Regular header columns (non-frozen) - maintain normal stacking
+    thead tr th:not(.frozen-column) {
+      z-index: 100 !important;
+      position: relative !important;
+    }
+
+    // Body frozen columns - inside scrollable body
+    .p-datatable-scrollable-body {
+      z-index: 1 !important;
+      position: relative !important;
+      
+      tbody tr td.frozen-column {
+        z-index: 50 !important;
+        background: #f8f9fa !important;
+        position: sticky !important;
+      }
+
+      tbody tr:hover td.frozen-column {
+        background: #e5e7eb !important;
+      }
+    }
+
+    // Additional selector for body frozen columns
+    tbody tr td.frozen-column {
+      z-index: 10 !important;
+      background: #f8f9fa !important;
+      position: sticky !important;
+    }
+
+    tbody tr:hover td.frozen-column {
+      background: #e5e7eb !important;
+    }
+
     .p-datatable-frozen-tbody,
     .p-datatable-unfrozen-view {
       .p-datatable-thead > tr > th {
         &.primary-key {
           box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-          z-index: 2;
         }
       }
     }
@@ -214,6 +313,10 @@ h2 {
       
       &:hover {
         background: #f3f4f6;
+
+        > td.frozen-column {
+          background: #e5e7eb !important;
+        }
       }
 
       > td {

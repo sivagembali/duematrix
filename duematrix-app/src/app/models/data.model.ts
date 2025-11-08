@@ -6,6 +6,7 @@ export interface ColumnHeader {
   col_width?: number;
   display: boolean;
   default_display: boolean; // Show column by default in the table
+  is_frozen: boolean; // Keep column frozen (fixed) on the left
   display_order: number;
 }
 

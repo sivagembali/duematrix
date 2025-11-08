@@ -18,6 +18,8 @@ export class UserTable implements OnInit {
   dataset: DataRow[] = [];
   columnHeaders: ColumnHeader[] = [];
   displayedColumns: ColumnHeader[] = [];
+  frozenColumns: ColumnHeader[] = []; // Columns with is_frozen = true
+  scrollableColumns: ColumnHeader[] = []; // Non-frozen columns
   availableColumns: ColumnHeader[] = []; // All columns available for selection
   selectedColumns: ColumnHeader[] = []; // Currently selected columns
   multiSelectOptions: { [key: string]: string[] } = {};
@@ -38,13 +40,19 @@ export class UserTable implements OnInit {
     // Store all columns that can be displayed
     this.availableColumns = this.columnHeaders
       .filter(col => col.display)
-      .sort((a, b) => a.display_order - b.display_order);
+      .sort((a, b) => {
+        // Sort frozen columns first, then by display_order
+        if (a.is_frozen !== b.is_frozen) {
+          return a.is_frozen ? -1 : 1;
+        }
+        return a.display_order - b.display_order;
+      });
     
     // Initialize selected columns with default_display columns
     this.selectedColumns = this.availableColumns.filter(col => col.default_display);
     
-    // Update displayed columns based on selected columns
-    this.displayedColumns = [...this.selectedColumns];
+    // Update displayed columns based on selected columns - frozen first
+    this.updateDisplayedColumns();
 
     // Generate filter options for multi-select columns
     this.generateMultiSelectOptions();
@@ -67,14 +75,33 @@ export class UserTable implements OnInit {
 
     console.log('Generated Dataset:', this.dataset);
     console.log('Column Headers:', this.columnHeaders);
+    console.log('Frozen Columns:', this.frozenColumns);
+    console.log('Scrollable Columns:', this.scrollableColumns);
     console.log('Displayed Columns (default_display=true):', this.displayedColumns);
-    console.log('Column Headers:', this.columnHeaders);
     console.log('MultiSelect Options:', this.multiSelectOptions);
+  }
+
+  // Update displayed columns - frozen first, then scrollable
+  updateDisplayedColumns() {
+    const sorted = [...this.selectedColumns].sort((a, b) => {
+      // Frozen columns come first
+      if (a.is_frozen !== b.is_frozen) {
+        return a.is_frozen ? -1 : 1;
+      }
+      return a.display_order - b.display_order;
+    });
+    
+    this.displayedColumns = sorted;
+    this.frozenColumns = sorted.filter(col => col.is_frozen);
+    this.scrollableColumns = sorted.filter(col => !col.is_frozen);
   }
 
   // Called when column selection changes
   onColumnSelectionChange() {
-    this.displayedColumns = [...this.selectedColumns].sort((a, b) => a.display_order - b.display_order);
+    this.updateDisplayedColumns();
+    
+    // Regenerate multiselect options for all displayed columns
+    this.generateMultiSelectOptions();
     
     // Update filter objects for new columns
     this.displayedColumns.forEach(col => {
@@ -143,6 +170,28 @@ export class UserTable implements OnInit {
 
   getColumnWidth(column: ColumnHeader): string {
     return column.col_width ? `${column.col_width}rem` : 'auto';
+  }
+
+  // Calculate the left position for frozen columns
+  getFrozenColumnLeft(column: ColumnHeader): string {
+    const frozenIndex = this.displayedColumns
+      .filter(col => col.is_frozen)
+      .findIndex(col => col.col_header === column.col_header);
+    
+    if (frozenIndex === 0) {
+      return '0px';
+    }
+    
+    // Calculate cumulative width of previous frozen columns
+    let cumulativeWidth = 0;
+    const frozenCols = this.displayedColumns.filter(col => col.is_frozen);
+    
+    for (let i = 0; i < frozenIndex; i++) {
+      const width = frozenCols[i].col_width || 12.5; // Default to 12.5rem (200px)
+      cumulativeWidth += width;
+    }
+    
+    return `${cumulativeWidth}rem`;
   }
 
   onRowEditInit(row: DataRow) {

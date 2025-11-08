@@ -39,7 +39,6 @@
     [scrollable]="true" 
     scrollHeight="600px"
     scrollDirection="both"
-    [frozenColumns]="displayedColumns.slice(0, 1)"
     [tableStyle]="{ 'min-width': '200rem', 'min-height': '400px' }"
     styleClass="p-datatable-striped p-datatable-gridlines"
     dataKey="id">
@@ -49,9 +48,11 @@
         @for (column of displayedColumns; track column.col_header) {
           <th 
             [style.min-width]="getColumnWidth(column)"
+            [style.left]="column.is_frozen ? getFrozenColumnLeft(column) : null"
             [class.primary-key]="column.col_header === 'id'"
             [class.editable]="column.is_editable"
-            [class.multi-select]="column.is_multi_select">
+            [class.multi-select]="column.is_multi_select"
+            [class.frozen-column]="column.is_frozen">
             {{ column.col_label }}
             @if (column.col_header === 'id') {
               <span class="key-badge">PK</span>
@@ -67,7 +68,10 @@
       </tr>
       <tr>
         @for (column of displayedColumns; track column.col_header) {
-          <th [style.min-width]="getColumnWidth(column)">
+          <th 
+            [style.min-width]="getColumnWidth(column)" 
+            [style.left]="column.is_frozen ? getFrozenColumnLeft(column) : null"
+            [class.frozen-column]="column.is_frozen">
             @if (column.is_multi_select) {
               <p-multiselect
                 [options]="multiSelectOptions[column.col_header]"
@@ -96,8 +100,10 @@
       <tr [pEditableRow]="row">
         @for (column of displayedColumns; track column.col_header) {
           <td 
+            [style.left]="column.is_frozen ? getFrozenColumnLeft(column) : null"
             [class.primary-key]="column.col_header === 'id'"
             [class.editable]="column.is_editable"
+            [class.frozen-column]="column.is_frozen"
             [title]="row[column.col_header]">
             
             @if (column.is_editable) {
