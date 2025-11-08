@@ -74,6 +74,35 @@ h2 {
       }
     }
 
+    // Filter row styling
+    .p-datatable-thead > tr:nth-child(2) > th {
+      background: #f8f9fa;
+      padding: 0.5rem;
+      
+      .filter-input {
+        width: 100%;
+        padding: 0.5rem;
+        font-size: 0.875rem;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        
+        &:focus {
+          outline: none;
+          border-color: #4f46e5;
+          box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+        }
+      }
+
+      .filter-multiselect {
+        font-size: 0.875rem;
+        
+        .p-multiselect-label {
+          padding: 0.5rem;
+          font-size: 0.875rem;
+        }
+      }
+    }
+
     // Frozen column styling
     .p-datatable-frozen-tbody,
     .p-datatable-unfrozen-view {

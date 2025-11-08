@@ -3,13 +3,14 @@
   
   <div class="table-info">
     <p><strong>Total Records:</strong> {{ dataset.length }}</p>
+    <p><strong>Filtered Records:</strong> {{ filteredDataset.length }}</p>
     <p><strong>Total Columns:</strong> {{ columnHeaders.length }}</p>
     <p><strong>Displayed Columns:</strong> {{ displayedColumns.length }}</p>
-    <p><strong>Tip:</strong> Click on any editable cell (blue header) to edit</p>
+    <p><strong>Tip:</strong> Use filters in header row to filter data. Click editable cells to edit.</p>
   </div>
 
   <p-table 
-    [value]="dataset" 
+    [value]="filteredDataset" 
     [scrollable]="true" 
     scrollHeight="600px"
     scrollDirection="both"
@@ -35,6 +36,31 @@
             }
             @if (column.is_editable) {
               <span class="edit-badge">✏️</span>
+            }
+          </th>
+        }
+      </tr>
+      <tr>
+        @for (column of displayedColumns; track column.col_header) {
+          <th [style.min-width]="getColumnWidth(column)">
+            @if (column.is_multi_select) {
+              <p-multiselect
+                [options]="multiSelectOptions[column.col_header]"
+                [(ngModel)]="selectedFilters[column.col_header]"
+                [placeholder]="'Filter ' + column.col_label"
+                [maxSelectedLabels]="1"
+                [style]="{ width: '100%' }"
+                styleClass="filter-multiselect"
+                (onChange)="onFilterChange($event, column.col_header)">
+              </p-multiselect>
+            } @else {
+              <input 
+                pInputText 
+                type="text"
+                [placeholder]="'Filter ' + column.col_label"
+                [(ngModel)]="filterValues[column.col_header]"
+                (input)="onTextFilterChange($event, column.col_header)"
+                class="filter-input" />
             }
           </th>
         }
