@@ -1,0 +1,52 @@
+<div class="card">
+  <h2>Data Matrix - 100 Records with 50 Columns</h2>
+  
+  <div class="table-info">
+    <p><strong>Total Records:</strong> {{ dataset.length }}</p>
+    <p><strong>Total Columns:</strong> {{ columnHeaders.length }}</p>
+    <p><strong>Displayed Columns:</strong> {{ displayedColumns.length }}</p>
+  </div>
+
+  <p-table 
+    [value]="dataset" 
+    [scrollable]="true" 
+    scrollHeight="600px"
+    scrollDirection="both"
+    [frozenColumns]="displayedColumns.slice(0, 1)"
+    [tableStyle]="{ 'min-width': '200rem' }"
+    styleClass="p-datatable-striped p-datatable-gridlines">
+    
+    <ng-template #header>
+      <tr>
+        @for (column of displayedColumns; track column.col_header) {
+          <th 
+            [style.min-width]="getColumnWidth(column)"
+            [class.primary-key]="column.col_header === 'id'"
+            [class.editable]="column.is_editable"
+            [class.multi-select]="column.is_multi_select">
+            {{ column.col_label }}
+            @if (column.col_header === 'id') {
+              <span class="key-badge">PK</span>
+            }
+            @if (!column.is_editable) {
+              <span class="readonly-badge">🔒</span>
+            }
+          </th>
+        }
+      </tr>
+    </ng-template>
+    
+    <ng-template #body let-row let-rowIndex="rowIndex">
+      <tr>
+        @for (column of displayedColumns; track column.col_header) {
+          <td 
+            [class.primary-key]="column.col_header === 'id'"
+            [class.editable]="column.is_editable"
+            [title]="row[column.col_header]">
+            {{ row[column.col_header] }}
+          </td>
+        }
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
