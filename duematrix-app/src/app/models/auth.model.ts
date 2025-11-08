@@ -21,6 +21,7 @@ export interface User {
   first_name: string;
   last_name: string;
   role_id: number | null;
+  role_name?: string | null;
   is_active: boolean;
   is_verified: boolean;
   created_at: string;

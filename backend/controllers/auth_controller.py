@@ -168,11 +168,29 @@ def login():
         access_token = create_access_token(identity=str(user.id))
         refresh_token = create_refresh_token(identity=str(user.id))
         
+        # Get user data with role information
+        user_dict = user.to_dict()
+        
+        # Get active role mapping
+        from models import RoleMapping, RoleMaster
+        role_mapping = RoleMapping.query.filter_by(
+            user_id=user.id,
+            is_active=True
+        ).first()
+        
+        if role_mapping:
+            role = RoleMaster.query.get(role_mapping.role_id)
+            user_dict['role_id'] = role.id if role else None
+            user_dict['role_name'] = role.role_name if role else None
+        else:
+            user_dict['role_id'] = None
+            user_dict['role_name'] = None
+        
         return jsonify({
             'success': True,
             'message': 'Login successful',
             'data': {
-                'user': user.to_dict(),
+                'user': user_dict,
                 'access_token': access_token,
                 'refresh_token': refresh_token
             }
@@ -215,9 +233,26 @@ def get_current_user():
         current_user_id = int(get_jwt_identity())
         user = User.query.get_or_404(current_user_id)
         
+        user_dict = user.to_dict()
+        
+        # Get active role mapping
+        from models import RoleMapping, RoleMaster
+        role_mapping = RoleMapping.query.filter_by(
+            user_id=user.id,
+            is_active=True
+        ).first()
+        
+        if role_mapping:
+            role = RoleMaster.query.get(role_mapping.role_id)
+            user_dict['role_id'] = role.id if role else None
+            user_dict['role_name'] = role.role_name if role else None
+        else:
+            user_dict['role_id'] = None
+            user_dict['role_name'] = None
+        
         return jsonify({
             'success': True,
-            'data': user.to_dict()
+            'data': user_dict
         }), 200
         
     except Exception as e:
@@ -284,3 +319,82 @@ def logout():
         'success': True,
         'message': 'Logout successful'
     }), 200
+
+
+@auth_bp.route('/users', methods=['GET'])
+@jwt_required()
+def get_all_users():
+    """Get all users (admin only)"""
+    try:
+        users = User.query.all()
+        users_data = []
+        
+        for user in users:
+            user_dict = user.to_dict()
+            
+            # Get active role mapping
+            from models import RoleMapping, RoleMaster
+            role_mapping = RoleMapping.query.filter_by(
+                user_id=user.id,
+                is_active=True
+            ).first()
+            
+            if role_mapping:
+                role = RoleMaster.query.get(role_mapping.role_id)
+                user_dict['role_id'] = role.id if role else None
+                user_dict['role_name'] = role.role_name if role else None
+            else:
+                user_dict['role_id'] = None
+                user_dict['role_name'] = None
+            
+            users_data.append(user_dict)
+        
+        return jsonify({
+            'success': True,
+            'data': users_data
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@auth_bp.route('/users/<int:user_id>/status', methods=['PATCH'])
+@jwt_required()
+def update_user_status(user_id):
+    """Update user active status (admin only)"""
+    try:
+        current_user_id = int(get_jwt_identity())
+        
+        # Prevent users from deactivating themselves
+        if current_user_id == user_id:
+            return jsonify({
+                'success': False,
+                'error': 'You cannot change your own status'
+            }), 400
+        
+        user = User.query.get_or_404(user_id)
+        data = request.get_json()
+        
+        if 'is_active' not in data:
+            return jsonify({
+                'success': False,
+                'error': 'is_active field is required'
+            }), 400
+        
+        user.is_active = data['is_active']
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f"User {'activated' if data['is_active'] else 'deactivated'} successfully",
+            'data': user.to_dict()
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500

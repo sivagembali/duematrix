@@ -1,0 +1,241 @@
+<div class="user-management-container">
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+  
+  <p-card>
+    <div class="header-section">
+      <h2>User Management</h2>
+      <button 
+        pButton 
+        label="Create User" 
+        icon="pi pi-plus"
+        class="p-button-success"
+        (click)="openCreateUserDialog()"
+      ></button>
+    </div>
+
+    <p-table 
+      [value]="users()" 
+      [loading]="loading()"
+      [paginator]="true"
+      [rows]="10"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} users"
+      styleClass="p-datatable-gridlines"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th>ID</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Name</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-user>
+        <tr>
+          <td>{{ user.id }}</td>
+          <td>{{ user.username }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.first_name }} {{ user.last_name }}</td>
+          <td>
+            <span [class]="'role-badge role-' + getRoleName(user.role_id).toLowerCase().replace(' ', '-')">
+              {{ getRoleName(user.role_id) }}
+            </span>
+          </td>
+          <td>
+            <span [class]="'status-badge ' + (user.is_active ? 'status-active' : 'status-inactive')">
+              {{ user.is_active ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+          <td>{{ user.created_at | istDate:'short' }}</td>
+          <td>
+            <button 
+              pButton 
+              [icon]="user.is_active ? 'pi pi-ban' : 'pi pi-check-circle'" 
+              [class]="'p-button-rounded p-button-text ' + (user.is_active ? 'p-button-danger' : 'p-button-success')"
+              [pTooltip]="user.is_active ? 'Deactivate User' : 'Activate User'"
+              (click)="toggleUserStatus(user)"
+            ></button>
+            <button 
+              pButton 
+              icon="pi pi-user-plus" 
+              class="p-button-rounded p-button-text p-button-info"
+              pTooltip="Assign Role"
+              (click)="openAssignRoleDialog(user)"
+            ></button>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="8" class="text-center">No users found</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+
+  <!-- Create User Dialog -->
+  <p-dialog 
+    header="Create New User" 
+    [(visible)]="showCreateUserDialog"
+    [modal]="true"
+    [style]="{width: '500px'}"
+    [draggable]="false"
+  >
+    <form [formGroup]="createUserForm" (ngSubmit)="createUser()">
+      <div class="form-field">
+        <label for="username">Username *</label>
+        <input 
+          pInputText 
+          id="username" 
+          formControlName="username"
+          class="w-full"
+        />
+        @if (createUserForm.get('username')?.invalid && createUserForm.get('username')?.touched) {
+          <small class="error-text">Username is required (min 3 characters)</small>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="email">Email *</label>
+        <input 
+          pInputText 
+          id="email" 
+          formControlName="email"
+          type="email"
+          class="w-full"
+        />
+        @if (createUserForm.get('email')?.invalid && createUserForm.get('email')?.touched) {
+          <small class="error-text">Valid email is required</small>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="password">Password *</label>
+        <p-password 
+          formControlName="password"
+          [feedback]="true"
+          [toggleMask]="true"
+          styleClass="w-full"
+          inputStyleClass="w-full"
+        ></p-password>
+        @if (createUserForm.get('password')?.invalid && createUserForm.get('password')?.touched) {
+          <small class="error-text">Password is required (min 8 characters)</small>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="first_name">First Name *</label>
+        <input 
+          pInputText 
+          id="first_name" 
+          formControlName="first_name"
+          class="w-full"
+        />
+        @if (createUserForm.get('first_name')?.invalid && createUserForm.get('first_name')?.touched) {
+          <small class="error-text">First name is required</small>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="last_name">Last Name *</label>
+        <input 
+          pInputText 
+          id="last_name" 
+          formControlName="last_name"
+          class="w-full"
+        />
+        @if (createUserForm.get('last_name')?.invalid && createUserForm.get('last_name')?.touched) {
+          <small class="error-text">Last name is required</small>
+        }
+      </div>
+
+      <div class="form-field-checkbox">
+        <p-checkbox 
+          formControlName="is_active" 
+          [binary]="true"
+          inputId="is_active"
+        ></p-checkbox>
+        <label for="is_active" class="checkbox-label">Is Active</label>
+      </div>
+
+      <div class="form-field-checkbox">
+        <p-checkbox 
+          formControlName="is_verified" 
+          [binary]="true"
+          inputId="is_verified"
+        ></p-checkbox>
+        <label for="is_verified" class="checkbox-label">Is Verified</label>
+      </div>
+
+      <div class="dialog-footer">
+        <button 
+          pButton 
+          type="button" 
+          label="Cancel" 
+          class="p-button-text"
+          (click)="closeCreateUserDialog()"
+        ></button>
+        <button 
+          pButton 
+          type="submit" 
+          label="Create User"
+          [loading]="loading()"
+        ></button>
+      </div>
+    </form>
+  </p-dialog>
+
+  <!-- Assign Role Dialog -->
+  <p-dialog 
+    header="Assign Role" 
+    [(visible)]="showAssignRoleDialog"
+    [modal]="true"
+    [style]="{width: '400px'}"
+    [draggable]="false"
+  >
+    @if (selectedUser) {
+      <div class="user-info">
+        <p><strong>User:</strong> {{ selectedUser.first_name }} {{ selectedUser.last_name }}</p>
+        <p><strong>Username:</strong> {{ selectedUser.username }}</p>
+      </div>
+    }
+
+    <form [formGroup]="assignRoleForm" (ngSubmit)="assignRole()">
+      <div class="form-field">
+        <label for="role_id">Select Role *</label>
+        <p-select
+          formControlName="role_id"
+          [options]="roles()"
+          optionLabel="role_name"
+          optionValue="id"
+          placeholder="Choose a role"
+          styleClass="w-full"
+        ></p-select>
+        @if (assignRoleForm.get('role_id')?.invalid && assignRoleForm.get('role_id')?.touched) {
+          <small class="error-text">Please select a role</small>
+        }
+      </div>
+
+      <div class="dialog-footer">
+        <button 
+          pButton 
+          type="button" 
+          label="Cancel" 
+          class="p-button-text"
+          (click)="closeAssignRoleDialog()"
+        ></button>
+        <button 
+          pButton 
+          type="submit" 
+          label="Assign Role"
+          [loading]="loading()"
+        ></button>
+      </div>
+    </form>
+  </p-dialog>
+</div>

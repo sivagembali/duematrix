@@ -65,8 +65,8 @@
             formControlName="rememberMe" 
             [binary]="true"
             inputId="rememberMe"
-            label="Remember me"
           ></p-checkbox>
+          <label for="rememberMe" class="checkbox-label">Remember me</label>
         </div>
 
         <button 
@@ -78,15 +78,6 @@
           [disabled]="loading()"
         ></button>
       </form>
-
-      <div class="login-footer">
-        <p class="demo-credentials">
-          <strong>Demo Credentials:</strong><br>
-          Admin: <code>admin_user</code> / <code>Admin@123</code><br>
-          Telecaller: <code>telecaller_user</code> / <code>Tele@123</code><br>
-          Field Agent: <code>fieldagent_user</code> / <code>Field@123</code>
-        </p>
-      </div>
     </p-card>
   </div>
 </div>

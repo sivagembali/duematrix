@@ -43,10 +43,14 @@ export class LoginComponent implements OnInit {
       this.router.navigate(['/dashboard']);
     }
 
+    // Load saved credentials if remember me was checked
+    const savedUsername = localStorage.getItem('rememberedUsername');
+    const rememberMe = localStorage.getItem('rememberMe') === 'true';
+
     this.loginForm = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(3)]],
+      username: [savedUsername || '', [Validators.required, Validators.minLength(3)]],
       password: ['', [Validators.required, Validators.minLength(8)]],
-      rememberMe: [false]
+      rememberMe: [rememberMe]
     });
   }
 
@@ -59,7 +63,7 @@ export class LoginComponent implements OnInit {
     this.loading.set(true);
     this.errorMessage.set(null);
 
-    const { username, password } = this.loginForm.value;
+    const { username, password, rememberMe } = this.loginForm.value;
 
     // Trim whitespace from username and password
     const trimmedUsername = username?.trim();
@@ -70,6 +74,16 @@ export class LoginComponent implements OnInit {
         this.loading.set(false);
         if (response.success) {
           console.log('Login successful', response.data.user);
+          
+          // Handle remember me functionality
+          if (rememberMe) {
+            localStorage.setItem('rememberedUsername', trimmedUsername);
+            localStorage.setItem('rememberMe', 'true');
+          } else {
+            localStorage.removeItem('rememberedUsername');
+            localStorage.removeItem('rememberMe');
+          }
+          
           // Navigate to dashboard
           this.router.navigate(['/dashboard']);
         }

@@ -46,14 +46,28 @@
   }
 
   .header-right {
-    ::ng-deep .p-button {
-      background-color: transparent;
-      border-color: white;
-      color: white;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
 
-      &:hover {
-        background-color: rgba(255, 255, 255, 0.1);
+    ::ng-deep .p-button {
+      &.p-button-text {
+        color: white;
+
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+      }
+
+      &.p-button-outlined {
+        background-color: transparent;
         border-color: white;
+        color: white;
+
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.1);
+          border-color: white;
+        }
       }
     }
   }

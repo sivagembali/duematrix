@@ -1,14 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterOutlet, RouterLink } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { AuthService } from '../../services/auth.service';
-import { UserTable } from '../user-table/user-table';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, CardModule, ButtonModule, UserTable],
+  imports: [CommonModule, CardModule, ButtonModule, RouterOutlet, RouterLink],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
@@ -27,6 +26,11 @@ export class DashboardComponent implements OnInit {
     this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
     });
+  }
+
+  isAdmin(): boolean {
+    // Check if user has admin role
+    return this.currentUser?.role_name?.toLowerCase() === 'admin';
   }
 
   logout(): void {
