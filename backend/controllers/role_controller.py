@@ -45,7 +45,7 @@ def get_role(role_id):
 def create_role():
     """Create a new role"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         data = request.get_json()
         
         if not data or 'role_name' not in data:
@@ -92,7 +92,7 @@ def create_role():
 def update_role(role_id):
     """Update a role"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         role = RoleMaster.query.get_or_404(role_id)
         data = request.get_json()
         
@@ -125,7 +125,7 @@ def update_role(role_id):
 def assign_role_to_user():
     """Assign a role to a user"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         data = request.get_json()
         
         if not data or 'user_id' not in data or 'role_id' not in data:
@@ -187,7 +187,7 @@ def assign_role_to_user():
 def revoke_role_from_user(mapping_id):
     """Revoke a role from a user"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         role_mapping = RoleMapping.query.get_or_404(mapping_id)
         
         role_mapping.is_active = False

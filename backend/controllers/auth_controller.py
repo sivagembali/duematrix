@@ -88,9 +88,9 @@ def register():
         db.session.add(user)
         db.session.commit()
         
-        # Create tokens
-        access_token = create_access_token(identity=user.id)
-        refresh_token = create_refresh_token(identity=user.id)
+        # Create tokens (convert user.id to string for JWT)
+        access_token = create_access_token(identity=str(user.id))
+        refresh_token = create_refresh_token(identity=str(user.id))
         
         return jsonify({
             'success': True,
@@ -164,9 +164,9 @@ def login():
         user.last_login = datetime.utcnow()
         db.session.commit()
         
-        # Create tokens
-        access_token = create_access_token(identity=user.id)
-        refresh_token = create_refresh_token(identity=user.id)
+        # Create tokens (convert user.id to string for JWT)
+        access_token = create_access_token(identity=str(user.id))
+        refresh_token = create_refresh_token(identity=str(user.id))
         
         return jsonify({
             'success': True,
@@ -212,7 +212,7 @@ def refresh():
 def get_current_user():
     """Get current authenticated user"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get_or_404(current_user_id)
         
         return jsonify({
@@ -232,7 +232,7 @@ def get_current_user():
 def change_password():
     """Change user password"""
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         user = User.query.get_or_404(current_user_id)
         
         data = request.get_json()

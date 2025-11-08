@@ -1,0 +1,100 @@
+.dashboard-container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.dashboard-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  .header-content {
+    max-width: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+
+    h1 {
+      margin: 0;
+      font-size: 1.75rem;
+      font-weight: 600;
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+
+      .welcome-text {
+        font-size: 1rem;
+        font-weight: 500;
+      }
+
+      .user-role {
+        font-size: 0.875rem;
+        opacity: 0.9;
+      }
+    }
+  }
+
+  .header-right {
+    ::ng-deep .p-button {
+      background-color: transparent;
+      border-color: white;
+      color: white;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: white;
+      }
+    }
+  }
+}
+
+.dashboard-main {
+  max-width: 100%;
+  margin: 0;
+  padding: 1rem 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    padding: 1rem;
+
+    .header-content {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .header-left {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
+
+    .header-right {
+      width: 100%;
+
+      ::ng-deep .p-button {
+        width: 100%;
+      }
+    }
+  }
+
+  .dashboard-main {
+    padding: 0 1rem;
+    margin: 1rem auto;
+  }
+}
