@@ -32,10 +32,12 @@ export class UserTable implements OnInit {
   originalRecords: Map<string, DataRow> = new Map(); // key: id, value: original row data
   clonedRows: { [key: string]: DataRow } = {}; // For edit mode cloning
 
+  constructor(private mockDataGenerator: MockDataGenerator) {}
+
   ngOnInit() {
     // Generate 100 records with 50 columns
-    this.dataset = MockDataGenerator.generateDataset(100);
-    this.columnHeaders = MockDataGenerator.generateHeaderMapping();
+    this.dataset = this.mockDataGenerator.generateDataset(100);
+    this.columnHeaders = this.mockDataGenerator.generateHeaderMapping();
     
     // Store all columns that can be displayed
     this.availableColumns = this.columnHeaders

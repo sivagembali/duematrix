@@ -33,7 +33,7 @@ export class DashboardComponent implements OnInit {
       this.currentUser = user;
     });
 
-    // Load headers for dashboard
+    // Always load headers when dashboard loads
     this.loadHeaders();
   }
 
@@ -43,7 +43,9 @@ export class DashboardComponent implements OnInit {
       next: (response) => {
         if (response.success) {
           this.headers = response.data;
-          console.log('Loaded headers:', this.headers);
+          // Update AuthService headers so they're available across the app
+          this.authService.setHeaders(response.data);
+          console.log('Dashboard: Loaded headers from API', this.headers.length);
         }
         this.loading = false;
       },

@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap, catchError, of } from 'rxjs';
+import { Observable, BehaviorSubject, tap, catchError, of, switchMap } from 'rxjs';
 import { LoginRequest, LoginResponse, User } from '../models/auth.model';
+import { HeaderService, ColumnHeader } from './header.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,14 +11,21 @@ export class AuthService {
   private apiUrl = 'http://localhost:5000/api/auth';
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
+  
+  private headersSubject = new BehaviorSubject<ColumnHeader[]>([]);
+  public headers$ = this.headersSubject.asObservable();
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private headerService: HeaderService
+  ) {
     // Load user from localStorage on service initialization
     this.loadUserFromStorage();
   }
 
   /**
    * Login user with username or email and password
+   * Also fetches headers after successful login
    */
   login(credentials: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials).pipe(
@@ -26,6 +34,22 @@ export class AuthService {
           // Store tokens and user data
           this.storeAuthData(response.data);
         }
+      }),
+      switchMap((response) => {
+        if (response.success) {
+          // Fetch headers after successful login
+          return this.headerService.getDashboardHeaders().pipe(
+            tap((headerResponse) => {
+              if (headerResponse.success) {
+                this.headersSubject.next(headerResponse.data);
+                localStorage.setItem('columnHeaders', JSON.stringify(headerResponse.data));
+              }
+            }),
+            // Return the original login response
+            switchMap(() => of(response))
+          );
+        }
+        return of(response);
       })
     );
   }
@@ -121,7 +145,9 @@ export class AuthService {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('currentUser');
+    localStorage.removeItem('columnHeaders');
     this.currentUserSubject.next(null);
+    this.headersSubject.next([]);
   }
 
   /**
@@ -136,6 +162,17 @@ export class AuthService {
       } catch (e) {
         console.error('Error parsing user from localStorage', e);
         this.clearAuthData();
+      }
+    }
+    
+    // Load headers from localStorage
+    const headersJson = localStorage.getItem('columnHeaders');
+    if (headersJson) {
+      try {
+        const headers = JSON.parse(headersJson);
+        this.headersSubject.next(headers);
+      } catch (e) {
+        console.error('Error parsing headers from localStorage', e);
       }
     }
   }
@@ -166,5 +203,20 @@ export class AuthService {
    */
   getCurrentUserValue(): User | null {
     return this.currentUserSubject.value;
+  }
+  
+  /**
+   * Get current headers value
+   */
+  getHeadersValue(): ColumnHeader[] {
+    return this.headersSubject.value;
+  }
+  
+  /**
+   * Set headers (used when loading headers from other components)
+   */
+  setHeaders(headers: ColumnHeader[]): void {
+    this.headersSubject.next(headers);
+    localStorage.setItem('columnHeaders', JSON.stringify(headers));
   }
 }

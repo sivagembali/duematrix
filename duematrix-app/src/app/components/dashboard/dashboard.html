@@ -46,7 +46,10 @@
         <p-card>
           <ng-template pTemplate="header">
             <div class="card-header">
-              <h2>Column Headers Configuration</h2>
+              <div>
+                <h2>Column Headers Configuration</h2>
+                <span class="api-badge">Loaded from API after login</span>
+              </div>
               <span class="header-count">{{ headers.length }} columns</span>
             </div>
           </ng-template>
@@ -98,7 +101,7 @@
                 <td>
                   <p-tag 
                     [value]="header.default_display ? 'Yes' : 'No'" 
-                    [severity]="header.default_display ? 'warning' : 'secondary'"
+                    [severity]="header.default_display ? 'warn' : 'secondary'"
                   ></p-tag>
                 </td>
                 <td>

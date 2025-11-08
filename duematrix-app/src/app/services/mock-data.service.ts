@@ -1,6 +1,13 @@
 import { ColumnHeader, DataRow } from '../models/data.model';
+import { Injectable, inject } from '@angular/core';
+import { AuthService } from './auth.service';
 
+@Injectable({
+  providedIn: 'root'
+})
 export class MockDataGenerator {
+  private authService = inject(AuthService);
+  
   private static readonly FIRST_NAMES = ['Raj', 'Priya', 'Amit', 'Sita', 'Vijay', 'Anita', 'Ravi', 'Lakshmi', 'Kumar', 'Deepa'];
   private static readonly LAST_NAMES = ['Sharma', 'Patel', 'Kumar', 'Singh', 'Reddy', 'Krishnan', 'Gupta', 'Nair', 'Desai', 'Rao'];
   private static readonly CITIES = ['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Kolkata', 'Hyderabad', 'Pune', 'Ahmedabad'];
@@ -8,7 +15,21 @@ export class MockDataGenerator {
   private static readonly DEPARTMENTS = ['Engineering', 'Sales', 'Marketing', 'HR', 'Finance', 'Operations', 'IT', 'Support'];
   private static readonly STATUSES = ['Active', 'Inactive', 'Pending', 'Completed', 'In Progress'];
 
-  static generateHeaderMapping(): ColumnHeader[] {
+  /**
+   * Get header mapping from API (via AuthService)
+   * Falls back to static headers if API data is not available
+   */
+  generateHeaderMapping(): ColumnHeader[] {
+    // Try to get headers from auth service (loaded from API)
+    const apiHeaders = this.authService.getHeadersValue();
+    
+    if (apiHeaders && apiHeaders.length > 0) {
+      console.log('Using headers from API:', apiHeaders.length);
+      return apiHeaders;
+    }
+    
+    // Fallback to static headers if API headers not available
+    console.warn('API headers not available, using fallback static headers');
     const headers: ColumnHeader[] = [
       { col_header: 'id', col_label: 'ID', is_editable: false, is_multi_select: false, col_width: 5, display: true, default_display: true, is_frozen: true, display_order: 1 },
       { col_header: 'customer_name', col_label: 'Customer Name', is_editable: false, is_multi_select: true, col_width: 15, display: true, default_display: true, is_frozen: true, display_order: 2 },
@@ -65,32 +86,32 @@ export class MockDataGenerator {
     return headers;
   }
 
-  static generateDataset(count: number = 100): DataRow[] {
+  generateDataset(count: number = 100): DataRow[] {
     const data: DataRow[] = [];
 
     for (let i = 1; i <= count; i++) {
       data.push({
         id: i,
-        customer_name: `${this.getRandomItem(this.FIRST_NAMES)} ${this.getRandomItem(this.LAST_NAMES)}`,
+        customer_name: `${this.getRandomItem(MockDataGenerator.FIRST_NAMES)} ${this.getRandomItem(MockDataGenerator.LAST_NAMES)}`,
         credit_card_no: this.generateCreditCard(),
         current_address: this.generateAddress(),
         email: `user${i}@example.com`,
         phone_number: this.generatePhone(),
         date_of_birth: this.generateDate(1950, 2005),
-        city: this.getRandomItem(this.CITIES),
-        state: this.getRandomItem(this.STATES),
+        city: this.getRandomItem(MockDataGenerator.CITIES),
+        state: this.getRandomItem(MockDataGenerator.STATES),
         postal_code: this.generatePostalCode(),
         country: 'India',
         account_balance: this.generateAmount(1000, 100000),
         account_type: this.getRandomItem(['Savings', 'Current', 'Fixed Deposit', 'Recurring Deposit']),
         registration_date: this.generateDate(2020, 2024),
         last_login: this.generateDateTime(),
-        status: this.getRandomItem(this.STATUSES),
-        department: this.getRandomItem(this.DEPARTMENTS),
+        status: this.getRandomItem(MockDataGenerator.STATUSES),
+        department: this.getRandomItem(MockDataGenerator.DEPARTMENTS),
         employee_id: `EMP${String(i).padStart(5, '0')}`,
         salary: this.generateAmount(30000, 200000),
         hire_date: this.generateDate(2015, 2024),
-        manager_name: `${this.getRandomItem(this.FIRST_NAMES)} ${this.getRandomItem(this.LAST_NAMES)}`,
+        manager_name: `${this.getRandomItem(MockDataGenerator.FIRST_NAMES)} ${this.getRandomItem(MockDataGenerator.LAST_NAMES)}`,
         project_name: `Project ${this.getRandomItem(['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon'])}`,
         project_code: `PRJ${String(Math.floor(Math.random() * 1000)).padStart(4, '0')}`,
         skill_set: this.getRandomItem(['Java, Python', 'React, Angular', 'DevOps, AWS', 'Data Science, ML']),
@@ -101,7 +122,7 @@ export class MockDataGenerator {
         blood_group: this.getRandomItem(['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-']),
         nationality: 'Indian',
         marital_status: this.getRandomItem(['Single', 'Married', 'Divorced']),
-        spouse_name: Math.random() > 0.5 ? `${this.getRandomItem(this.FIRST_NAMES)} ${this.getRandomItem(this.LAST_NAMES)}` : 'N/A',
+        spouse_name: Math.random() > 0.5 ? `${this.getRandomItem(MockDataGenerator.FIRST_NAMES)} ${this.getRandomItem(MockDataGenerator.LAST_NAMES)}` : 'N/A',
         children_count: Math.floor(Math.random() * 4),
         vehicle_type: this.getRandomItem(['Two Wheeler', 'Four Wheeler', 'None']),
         vehicle_number: `MH${String(Math.floor(Math.random() * 100)).padStart(2, '0')}XX${Math.floor(Math.random() * 10000)}`,
@@ -111,13 +132,13 @@ export class MockDataGenerator {
         bank_name: this.getRandomItem(['HDFC Bank', 'ICICI Bank', 'SBI', 'Axis Bank', 'Kotak Mahindra']),
         bank_account_no: this.generateAccountNumber(),
         ifsc_code: `${this.getRandomItem(['HDFC', 'ICIC', 'SBIN', 'UTIB', 'KKBK'])}0${String(Math.floor(Math.random() * 100000)).padStart(6, '0')}`,
-        branch_name: `${this.getRandomItem(this.CITIES)} Branch`,
+        branch_name: `${this.getRandomItem(MockDataGenerator.CITIES)} Branch`,
         annual_income: this.generateAmount(360000, 2400000),
         tax_regime: this.getRandomItem(['Old Regime', 'New Regime']),
         performance_rating: (Math.random() * 5).toFixed(1),
         last_appraisal_date: this.generateDate(2023, 2024),
         next_appraisal_date: this.generateDate(2025, 2026),
-        work_location: this.getRandomItem(this.CITIES),
+        work_location: this.getRandomItem(MockDataGenerator.CITIES),
         remote_work_eligible: this.getRandomItem(['Yes', 'No']),
         notes: `Sample notes for record ${i}. ${this.generateRandomText()}`
       });
@@ -126,11 +147,11 @@ export class MockDataGenerator {
     return data;
   }
 
-  private static getRandomItem<T>(array: T[]): T {
+  private getRandomItem<T>(array: T[]): T {
     return array[Math.floor(Math.random() * array.length)];
   }
 
-  private static generateCreditCard(): string {
+  private generateCreditCard(): string {
     let card = '';
     for (let i = 0; i < 16; i++) {
       card += Math.floor(Math.random() * 10);
@@ -138,41 +159,41 @@ export class MockDataGenerator {
     return card;
   }
 
-  private static generateAddress(): string {
+  private generateAddress(): string {
     const street = Math.floor(Math.random() * 999) + 1;
     const building = this.getRandomItem(['A', 'B', 'C', 'D']);
     const area = this.getRandomItem(['Sector', 'Phase', 'Block']);
     const num = Math.floor(Math.random() * 50) + 1;
-    return `${street}/${building}/${area}-${num}/${this.getRandomItem(this.CITIES)}`;
+    return `${street}/${building}/${area}-${num}/${this.getRandomItem(MockDataGenerator.CITIES)}`;
   }
 
-  private static generatePhone(): string {
+  private generatePhone(): string {
     return `+91${Math.floor(Math.random() * 9000000000) + 1000000000}`;
   }
 
-  private static generateDate(startYear: number, endYear: number): string {
+  private generateDate(startYear: number, endYear: number): string {
     const year = Math.floor(Math.random() * (endYear - startYear + 1)) + startYear;
     const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
     const day = String(Math.floor(Math.random() * 28) + 1).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
 
-  private static generateDateTime(): string {
+  private generateDateTime(): string {
     const date = this.generateDate(2024, 2025);
     const hour = String(Math.floor(Math.random() * 24)).padStart(2, '0');
     const minute = String(Math.floor(Math.random() * 60)).padStart(2, '0');
     return `${date} ${hour}:${minute}`;
   }
 
-  private static generatePostalCode(): string {
+  private generatePostalCode(): string {
     return String(Math.floor(Math.random() * 900000) + 100000);
   }
 
-  private static generateAmount(min: number, max: number): string {
+  private generateAmount(min: number, max: number): string {
     return Math.floor(Math.random() * (max - min + 1) + min).toFixed(2);
   }
 
-  private static generatePAN(): string {
+  private generatePAN(): string {
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let pan = '';
     for (let i = 0; i < 5; i++) {
@@ -183,15 +204,15 @@ export class MockDataGenerator {
     return pan;
   }
 
-  private static generateAadhar(): string {
+  private generateAadhar(): string {
     return String(Math.floor(Math.random() * 900000000000) + 100000000000);
   }
 
-  private static generateAccountNumber(): string {
+  private generateAccountNumber(): string {
     return String(Math.floor(Math.random() * 9000000000000000) + 1000000000000000);
   }
 
-  private static generateRandomText(): string {
+  private generateRandomText(): string {
     const texts = [
       'Important customer record.',
       'High priority account.',

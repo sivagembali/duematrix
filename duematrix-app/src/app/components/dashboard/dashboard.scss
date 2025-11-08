@@ -89,10 +89,33 @@
     align-items: center;
     padding: 1rem;
 
+    > div {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
     h2 {
       margin: 0;
       font-size: 1.5rem;
       color: #333;
+    }
+
+    .api-badge {
+      font-size: 0.75rem;
+      color: #28a745;
+      font-weight: 600;
+      background-color: #d4edda;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+
+      &::before {
+        content: "✓";
+        font-weight: bold;
+      }
     }
 
     .header-count {
