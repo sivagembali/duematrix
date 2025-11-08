@@ -18,6 +18,8 @@ export class UserTable implements OnInit {
   dataset: DataRow[] = [];
   columnHeaders: ColumnHeader[] = [];
   displayedColumns: ColumnHeader[] = [];
+  availableColumns: ColumnHeader[] = []; // All columns available for selection
+  selectedColumns: ColumnHeader[] = []; // Currently selected columns
   multiSelectOptions: { [key: string]: string[] } = {};
   selectedFilters: { [key: string]: string[] } = {};
   filterValues: { [key: string]: string } = {};
@@ -33,10 +35,16 @@ export class UserTable implements OnInit {
     this.dataset = MockDataGenerator.generateDataset(100);
     this.columnHeaders = MockDataGenerator.generateHeaderMapping();
     
-    // Filter only displayed columns and sort by display_order
-    this.displayedColumns = this.columnHeaders
+    // Store all columns that can be displayed
+    this.availableColumns = this.columnHeaders
       .filter(col => col.display)
       .sort((a, b) => a.display_order - b.display_order);
+    
+    // Initialize selected columns with default_display columns
+    this.selectedColumns = this.availableColumns.filter(col => col.default_display);
+    
+    // Update displayed columns based on selected columns
+    this.displayedColumns = [...this.selectedColumns];
 
     // Generate filter options for multi-select columns
     this.generateMultiSelectOptions();
@@ -59,7 +67,26 @@ export class UserTable implements OnInit {
 
     console.log('Generated Dataset:', this.dataset);
     console.log('Column Headers:', this.columnHeaders);
+    console.log('Displayed Columns (default_display=true):', this.displayedColumns);
+    console.log('Column Headers:', this.columnHeaders);
     console.log('MultiSelect Options:', this.multiSelectOptions);
+  }
+
+  // Called when column selection changes
+  onColumnSelectionChange() {
+    this.displayedColumns = [...this.selectedColumns].sort((a, b) => a.display_order - b.display_order);
+    
+    // Update filter objects for new columns
+    this.displayedColumns.forEach(col => {
+      if (col.is_multi_select && !this.selectedFilters[col.col_header]) {
+        this.selectedFilters[col.col_header] = [];
+      } else if (!col.is_multi_select && this.filterValues[col.col_header] === undefined) {
+        this.filterValues[col.col_header] = '';
+      }
+    });
+    
+    // Reapply filters with new column set
+    this.applyFilters();
   }
 
   generateMultiSelectOptions() {

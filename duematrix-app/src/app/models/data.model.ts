@@ -5,6 +5,7 @@ export interface ColumnHeader {
   is_multi_select?: boolean;
   col_width?: number;
   display: boolean;
+  default_display: boolean; // Show column by default in the table
   display_order: number;
 }
 

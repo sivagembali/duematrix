@@ -1,6 +1,20 @@
 <div class="card">
   <h2>Data Matrix - 100 Records with 50 Columns</h2>
   
+  <div class="column-selector">
+    <label for="columnSelect">Select Columns to Display:</label>
+    <p-multiselect 
+      inputId="columnSelect"
+      [options]="availableColumns" 
+      [(ngModel)]="selectedColumns"
+      optionLabel="col_label"
+      placeholder="Choose columns"
+      [showToggleAll]="true"
+      (onChange)="onColumnSelectionChange()"
+      [style]="{'width': '100%', 'max-width': '600px'}">
+    </p-multiselect>
+  </div>
+
   <div class="table-info">
     <p><strong>Total Records:</strong> {{ dataset.length }}</p>
     <p><strong>Filtered Records:</strong> {{ filteredDataset.length }}</p>
