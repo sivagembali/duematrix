@@ -11,7 +11,7 @@ export class MockDataGenerator {
   static generateHeaderMapping(): ColumnHeader[] {
     const headers: ColumnHeader[] = [
       { col_header: 'id', col_label: 'ID', is_editable: false, is_multi_select: false, col_width: 5, display: true, display_order: 1 },
-      { col_header: 'customer_name', col_label: 'Customer Name', is_editable: true, is_multi_select: false, col_width: 15, display: true, display_order: 2 },
+      { col_header: 'customer_name', col_label: 'Customer Name', is_editable: false, is_multi_select: false, col_width: 15, display: true, display_order: 2 },
       { col_header: 'credit_card_no', col_label: 'Credit Card No', is_editable: true, is_multi_select: false, col_width: 15, display: true, display_order: 3 },
       { col_header: 'current_address', col_label: 'Current Address', is_editable: true, is_multi_select: false, col_width: 20, display: true, display_order: 4 },
       { col_header: 'email', col_label: 'Email', is_editable: true, is_multi_select: false, col_width: 15, display: true, display_order: 5 },

@@ -5,6 +5,7 @@
     <p><strong>Total Records:</strong> {{ dataset.length }}</p>
     <p><strong>Total Columns:</strong> {{ columnHeaders.length }}</p>
     <p><strong>Displayed Columns:</strong> {{ displayedColumns.length }}</p>
+    <p><strong>Tip:</strong> Click on any editable cell (blue header) to edit</p>
   </div>
 
   <p-table 
@@ -14,9 +15,10 @@
     scrollDirection="both"
     [frozenColumns]="displayedColumns.slice(0, 1)"
     [tableStyle]="{ 'min-width': '200rem' }"
-    styleClass="p-datatable-striped p-datatable-gridlines">
+    styleClass="p-datatable-striped p-datatable-gridlines"
+    dataKey="id">
     
-    <ng-template #header>
+    <ng-template pTemplate="header">
       <tr>
         @for (column of displayedColumns; track column.col_header) {
           <th 
@@ -31,19 +33,40 @@
             @if (!column.is_editable) {
               <span class="readonly-badge">🔒</span>
             }
+            @if (column.is_editable) {
+              <span class="edit-badge">✏️</span>
+            }
           </th>
         }
       </tr>
     </ng-template>
     
-    <ng-template #body let-row let-rowIndex="rowIndex">
-      <tr>
+    <ng-template pTemplate="body" let-row let-rowIndex="rowIndex" let-editing="editing">
+      <tr [pEditableRow]="row">
         @for (column of displayedColumns; track column.col_header) {
           <td 
             [class.primary-key]="column.col_header === 'id'"
             [class.editable]="column.is_editable"
             [title]="row[column.col_header]">
-            {{ row[column.col_header] }}
+            
+            @if (column.is_editable) {
+              <p-cellEditor
+                [pEditableColumn]="row"
+                [pEditableColumnField]="column.col_header">
+                <ng-template pTemplate="input">
+                  <input 
+                    pInputText 
+                    type="text" 
+                    [(ngModel)]="row[column.col_header]"
+                    class="edit-input" />
+                </ng-template>
+                <ng-template pTemplate="output">
+                  {{ row[column.col_header] }}
+                </ng-template>
+              </p-cellEditor>
+            } @else {
+              {{ row[column.col_header] }}
+            }
           </td>
         }
       </tr>

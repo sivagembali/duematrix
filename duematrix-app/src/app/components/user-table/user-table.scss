@@ -67,6 +67,11 @@ h2 {
         margin-left: 0.25rem;
         font-size: 0.8rem;
       }
+
+      .edit-badge {
+        margin-left: 0.25rem;
+        font-size: 0.75rem;
+      }
     }
 
     // Frozen column styling
@@ -107,6 +112,35 @@ h2 {
             background: #e0e7ff;
           }
         }
+
+        // Cell editor styling
+        .p-cell-editor {
+          .edit-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 2px solid #4f46e5;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            
+            &:focus {
+              outline: none;
+              border-color: #6366f1;
+              box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            }
+          }
+        }
+      }
+
+      // Editing row styling
+      &.p-row-editing {
+        background: #eef2ff !important;
+        
+        > td {
+          &.editable {
+            background: white;
+            border: 1px solid #c7d2fe;
+          }
+        }
       }
     }
 
@@ -122,5 +156,10 @@ h2 {
 
   .p-datatable-scrollable .p-datatable-frozen-tbody {
     background: white;
+  }
+
+  // Input text styling in edit mode
+  .p-inputtext {
+    font-family: inherit;
   }
 }

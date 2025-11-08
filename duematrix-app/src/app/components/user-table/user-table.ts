@@ -1,12 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { InputTextModule } from 'primeng/inputtext';
 import { ColumnHeader, DataRow } from '../../models/data.model';
 import { MockDataGenerator } from '../../services/mock-data.service';
 
 @Component({
   selector: 'app-user-table',
-  imports: [CommonModule, TableModule],
+  imports: [CommonModule, TableModule, FormsModule, InputTextModule],
   templateUrl: './user-table.html',
   styleUrl: './user-table.scss',
 })
@@ -31,5 +33,17 @@ export class UserTable implements OnInit {
 
   getColumnWidth(column: ColumnHeader): string {
     return column.col_width ? `${column.col_width}rem` : 'auto';
+  }
+
+  onRowEditInit(row: DataRow) {
+    console.log('Edit started for row:', row);
+  }
+
+  onRowEditSave(row: DataRow) {
+    console.log('Row saved:', row);
+  }
+
+  onRowEditCancel(row: DataRow, index: number) {
+    console.log('Edit cancelled for row:', row);
   }
 }
