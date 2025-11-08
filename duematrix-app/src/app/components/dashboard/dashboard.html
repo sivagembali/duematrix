@@ -39,5 +39,91 @@
 
   <main class="dashboard-main">
     <router-outlet></router-outlet>
+    
+    <!-- Headers Configuration Display -->
+    @if (headers.length > 0) {
+      <div class="headers-section">
+        <p-card>
+          <ng-template pTemplate="header">
+            <div class="card-header">
+              <h2>Column Headers Configuration</h2>
+              <span class="header-count">{{ headers.length }} columns</span>
+            </div>
+          </ng-template>
+          
+          <p-table 
+            [value]="headers" 
+            [loading]="loading"
+            [tableStyle]="{'min-width': '50rem'}"
+            styleClass="p-datatable-sm"
+          >
+            <ng-template pTemplate="header">
+              <tr>
+                <th pSortableColumn="display_order">Order <p-sortIcon field="display_order"></p-sortIcon></th>
+                <th pSortableColumn="col_header">Header <p-sortIcon field="col_header"></p-sortIcon></th>
+                <th pSortableColumn="col_label">Label <p-sortIcon field="col_label"></p-sortIcon></th>
+                <th>Width (rem)</th>
+                <th>Editable</th>
+                <th>Multi-Select</th>
+                <th>Display</th>
+                <th>Default</th>
+                <th>Frozen</th>
+                <th>Role</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-header>
+              <tr>
+                <td>{{ header.display_order }}</td>
+                <td><code>{{ header.col_header }}</code></td>
+                <td><strong>{{ header.col_label }}</strong></td>
+                <td>{{ header.col_width }}</td>
+                <td>
+                  <p-tag 
+                    [value]="header.is_editable ? 'Yes' : 'No'" 
+                    [severity]="header.is_editable ? 'success' : 'secondary'"
+                  ></p-tag>
+                </td>
+                <td>
+                  <p-tag 
+                    [value]="header.is_multi_select ? 'Yes' : 'No'" 
+                    [severity]="header.is_multi_select ? 'info' : 'secondary'"
+                  ></p-tag>
+                </td>
+                <td>
+                  <p-tag 
+                    [value]="header.display ? 'Yes' : 'No'" 
+                    [severity]="header.display ? 'success' : 'danger'"
+                  ></p-tag>
+                </td>
+                <td>
+                  <p-tag 
+                    [value]="header.default_display ? 'Yes' : 'No'" 
+                    [severity]="header.default_display ? 'warning' : 'secondary'"
+                  ></p-tag>
+                </td>
+                <td>
+                  <p-tag 
+                    [value]="header.is_frozen ? 'Yes' : 'No'" 
+                    [severity]="header.is_frozen ? 'info' : 'secondary'"
+                  ></p-tag>
+                </td>
+                <td>
+                  @if (header.role_id) {
+                    <p-tag value="Role Specific" severity="danger"></p-tag>
+                  } @else {
+                    <p-tag value="All Roles" severity="success"></p-tag>
+                  }
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="10" class="text-center">No headers configured</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </p-card>
+      </div>
+    }
   </main>
 </div>

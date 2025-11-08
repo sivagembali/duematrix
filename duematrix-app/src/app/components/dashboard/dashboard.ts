@@ -3,19 +3,25 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet, RouterLink } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
+import { TableModule } from 'primeng/table';
+import { TagModule } from 'primeng/tag';
 import { AuthService } from '../../services/auth.service';
+import { HeaderService, ColumnHeader } from '../../services/header.service';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, CardModule, ButtonModule, RouterOutlet, RouterLink],
+  imports: [CommonModule, CardModule, ButtonModule, RouterOutlet, RouterLink, TableModule, TagModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
 export class DashboardComponent implements OnInit {
   currentUser: any = null;
+  headers: ColumnHeader[] = [];
+  loading: boolean = false;
 
   constructor(
     private authService: AuthService,
+    private headerService: HeaderService,
     private router: Router
   ) {}
 
@@ -25,6 +31,26 @@ export class DashboardComponent implements OnInit {
     // Subscribe to user changes
     this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
+    });
+
+    // Load headers for dashboard
+    this.loadHeaders();
+  }
+
+  loadHeaders(): void {
+    this.loading = true;
+    this.headerService.getDashboardHeaders().subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.headers = response.data;
+          console.log('Loaded headers:', this.headers);
+        }
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading headers:', error);
+        this.loading = false;
+      }
     });
   }
 

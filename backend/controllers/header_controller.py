@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
-from models import db, ColumnHeader
+from models import db, ColumnHeader, User, RoleMapping, RoleMaster
 from sqlalchemy.exc import IntegrityError
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 header_bp = Blueprint('headers', __name__)
 
@@ -200,3 +201,106 @@ def get_default_headers():
             'success': False,
             'error': str(e)
         }), 500
+
+
+@header_bp.route('/headers/dashboard', methods=['GET'])
+@jwt_required()
+def get_dashboard_headers():
+    """
+    Get column headers for the authenticated user's dashboard
+    Returns headers based on user's role or all headers if no role-specific headers exist
+    """
+    try:
+        # Get current user
+        current_user_id = int(get_jwt_identity())
+        user = User.query.get(current_user_id)
+        
+        if not user:
+            return jsonify({
+                'success': False,
+                'error': 'User not found'
+            }), 404
+        
+        # Get user's role
+        role_mapping = RoleMapping.query.filter_by(user_id=user.id).first()
+        
+        if role_mapping:
+            # Get headers for user's role and generic headers (role_id=null)
+            headers = ColumnHeader.query.filter(
+                (ColumnHeader.role_id == role_mapping.role_id) | 
+                (ColumnHeader.role_id == None)
+            ).filter_by(display=True).order_by(ColumnHeader.display_order).all()
+        else:
+            # No role assigned, return only generic headers
+            headers = ColumnHeader.query.filter_by(
+                role_id=None, 
+                display=True
+            ).order_by(ColumnHeader.display_order).all()
+        
+        return jsonify({
+            'success': True,
+            'data': [header.to_dict() for header in headers],
+            'count': len(headers),
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'role_id': role_mapping.role_id if role_mapping else None
+            }
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@header_bp.route('/headers/role/<int:role_id>', methods=['GET'])
+@jwt_required()
+def get_headers_by_role(role_id):
+    """
+    Get column headers for a specific role
+    Admin endpoint to preview headers for any role
+    """
+    try:
+        # Get current user to check if admin
+        current_user_id = int(get_jwt_identity())
+        user = User.query.get(current_user_id)
+        
+        if not user:
+            return jsonify({
+                'success': False,
+                'error': 'User not found'
+            }), 404
+        
+        # Check if role exists
+        role = RoleMaster.query.get(role_id)
+        if not role:
+            return jsonify({
+                'success': False,
+                'error': 'Role not found'
+            }), 404
+        
+        # Get headers for the specified role and generic headers
+        headers = ColumnHeader.query.filter(
+            (ColumnHeader.role_id == role_id) | 
+            (ColumnHeader.role_id == None)
+        ).filter_by(display=True).order_by(ColumnHeader.display_order).all()
+        
+        return jsonify({
+            'success': True,
+            'data': [header.to_dict() for header in headers],
+            'count': len(headers),
+            'role': {
+                'id': role.id,
+                'name': role.role_name,
+                'description': role.role_description
+            }
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+

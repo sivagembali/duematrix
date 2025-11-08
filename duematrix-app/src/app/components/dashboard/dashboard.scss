@@ -79,6 +79,98 @@
   padding: 1rem 0.5rem;
 }
 
+.headers-section {
+  margin-top: 1.5rem;
+  padding: 0 1rem;
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+
+    h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: #333;
+    }
+
+    .header-count {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+  }
+
+  ::ng-deep {
+    .p-card {
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .p-card-body {
+      padding: 0;
+    }
+
+    .p-card-content {
+      padding: 0;
+    }
+
+    .p-datatable {
+      .p-datatable-header {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+      }
+
+      th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        color: #495057;
+        padding: 1rem;
+        white-space: nowrap;
+      }
+
+      td {
+        padding: 0.75rem 1rem;
+        
+        code {
+          background-color: #f1f3f5;
+          padding: 0.25rem 0.5rem;
+          border-radius: 4px;
+          font-family: 'Courier New', monospace;
+          font-size: 0.875rem;
+          color: #495057;
+        }
+
+        strong {
+          color: #212529;
+        }
+      }
+
+      .p-datatable-tbody > tr {
+        &:hover {
+          background-color: #f8f9fa;
+        }
+      }
+    }
+
+    .p-tag {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+    }
+  }
+
+  .text-center {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+    font-style: italic;
+  }
+}
+
 @media (max-width: 768px) {
   .dashboard-header {
     padding: 1rem;
