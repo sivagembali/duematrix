@@ -21,9 +21,12 @@ class User(db.Model):
     last_name = db.Column(db.String(100))
     
     # Role and Status
-    role_id = db.Column(db.Integer, nullable=True, index=True)
+    role_id = db.Column(db.Integer, nullable=True, index=True)  # Deprecated - use role_mappings instead
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     is_verified = db.Column(db.Boolean, default=False, nullable=False)
+    
+    # Relationships
+    role_mappings = db.relationship('RoleMapping', backref='user', lazy='dynamic', cascade='all, delete-orphan', foreign_keys='RoleMapping.user_id')
     
     # Timestamps
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)

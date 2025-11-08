@@ -26,9 +26,11 @@ def create_app(config_name=None):
     # Register blueprints
     from controllers.header_controller import header_bp
     from controllers.auth_controller import auth_bp
+    from controllers.role_controller import role_bp
     
     app.register_blueprint(header_bp, url_prefix='/api')
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
+    app.register_blueprint(role_bp, url_prefix='/api')
     
     # Create tables
     with app.app_context():
