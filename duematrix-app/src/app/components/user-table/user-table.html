@@ -1,3 +1,5 @@
+<p-toast></p-toast>
+
 <div class="card">
   <div class="table-info">
     <p><strong>Total Records:</strong> {{ dataset.length }}</p>
@@ -21,7 +23,17 @@
           (onChange)="onColumnSelectionChange()">
         </p-multiselect>
       </div>
-      <div class="action-buttons-info">
+      <div class="action-buttons-info" style="display: flex; gap: 0.5rem;">
+        <p-button 
+          icon="pi pi-save" 
+          severity="success"
+          size="small"
+          [rounded]="true"
+          title="Save Edited Records ({{ editedRecords.size }})"
+          (onClick)="saveAllEdits()"
+          [disabled]="editedRecords.size === 0 || saving"
+          [loading]="saving">
+        </p-button>
         <p-button 
           icon="pi pi-download" 
           severity="secondary"
@@ -70,12 +82,12 @@
             [class.multi-select]="column.is_multi_select"
             [class.frozen-column]="column.is_frozen">
             {{ column.col_label }}
-            @if (column.col_header === 'id') {
+            <!-- @if (column.col_header === 'id') {
               <span class="key-badge">PK</span>
-            }
-            @if (!column.is_editable) {
+            } -->
+            <!-- @if (!column.is_editable) {
               <span class="readonly-badge">🔒</span>
-            }
+            } -->
             @if (column.is_editable) {
               <span class="edit-badge">✏️</span>
             }
@@ -112,8 +124,8 @@
       </tr>
     </ng-template>
     
-    <ng-template pTemplate="body" let-row let-rowIndex="rowIndex" let-editing="editing">
-      <tr [pEditableRow]="row">
+    <ng-template pTemplate="body" let-row let-rowIndex="rowIndex">
+      <tr>
         @for (column of displayedColumns; track column.col_header) {
           <td 
             [style.left]="column.is_frozen ? getFrozenColumnLeft(column) : null"
@@ -123,20 +135,13 @@
             [title]="row[column.col_header]">
             
             @if (column.is_editable) {
-              <p-cellEditor
-                [pEditableColumn]="row"
-                [pEditableColumnField]="column.col_header">
-                <ng-template pTemplate="input">
-                  <input 
-                    pInputText 
-                    type="text" 
-                    [(ngModel)]="row[column.col_header]"
-                    class="edit-input" />
-                </ng-template>
-                <ng-template pTemplate="output">
-                  {{ row[column.col_header] }}
-                </ng-template>
-              </p-cellEditor>
+              <input 
+                pInputText 
+                type="text" 
+                [(ngModel)]="row[column.col_header]"
+                (ngModelChange)="onCellChange(row)"
+                class="edit-input"
+                style="width: 100%;" />
             } @else {
               {{ row[column.col_header] }}
             }

@@ -201,7 +201,10 @@ def create_customer_data():
 def update_customer_data(record_id):
     """Update an existing customer data record"""
     try:
-        current_user = get_jwt_identity()
+        current_user_id = get_jwt_identity()
+        # Get user object to retrieve username
+        user = User.query.get(int(current_user_id))
+        
         record = CustomerData.query.get(record_id)
         
         if not record:
@@ -217,7 +220,7 @@ def update_customer_data(record_id):
             if hasattr(record, key) and key not in ['id', 'created_at', 'created_by']:
                 setattr(record, key, value)
         
-        record.updated_by = current_user.get('username', 'system')
+        record.updated_by = user.username if user else 'system'
         
         db.session.commit()
         

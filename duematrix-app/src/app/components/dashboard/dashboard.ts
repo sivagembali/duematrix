@@ -3,14 +3,13 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet, RouterLink } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
-import { TableModule } from 'primeng/table';
-import { TagModule } from 'primeng/tag';
+// Table and Tag modules removed from dashboard imports since UI section was removed
 import { AuthService } from '../../services/auth.service';
 import { HeaderService, ColumnHeader } from '../../services/header.service';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, CardModule, ButtonModule, RouterOutlet, RouterLink, TableModule, TagModule],
+  imports: [CommonModule, CardModule, ButtonModule, RouterOutlet, RouterLink],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })

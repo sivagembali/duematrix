@@ -5,13 +5,17 @@ import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { ButtonModule } from 'primeng/button';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 import { ColumnHeader, DataRow, CustomerData } from '../../models/data.model';
 import { MockDataGenerator } from '../../services/mock-data.service';
 import { DataService } from '../../services/data.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-user-table',
-  imports: [CommonModule, TableModule, FormsModule, InputTextModule, MultiSelectModule, ButtonModule],
+  imports: [CommonModule, TableModule, FormsModule, InputTextModule, MultiSelectModule, ButtonModule, ToastModule],
+  providers: [MessageService],
   templateUrl: './user-table.html',
   styleUrl: './user-table.scss',
 })
@@ -28,17 +32,18 @@ export class UserTable implements OnInit {
   filterValues: { [key: string]: string } = {};
   filteredDataset: DataRow[] = [];
   loading: boolean = false;
+  saving: boolean = false;
   totalRecords: number = 0;
   
   // Track edited records
   editedRecords: Map<string, DataRow> = new Map(); // key: id, value: edited row data
   originalRecords: Map<string, DataRow> = new Map(); // key: id, value: original row data
-  clonedRows: { [key: string]: DataRow } = {}; // For edit mode cloning
 
   constructor(
     private mockDataGenerator: MockDataGenerator,
     private dataService: DataService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private messageService: MessageService
   ) {}
 
   ngOnInit() {
@@ -313,54 +318,81 @@ export class UserTable implements OnInit {
     return `${cumulativeWidth}rem`;
   }
 
-  onRowEditInit(row: DataRow) {
-    const rowId = row['id'].toString();
-    // Clone the row data before editing
-    this.clonedRows[rowId] = { ...row };
-    console.log('Edit started for row:', row);
+  // Track cell value changes
+  onCellChange(row: DataRow) {
+    const rowId = row.id.toString();
+    
+    // Store original if not already stored
+    if (!this.originalRecords.has(rowId)) {
+      // Store a deep copy of the original row
+      this.originalRecords.set(rowId, JSON.parse(JSON.stringify(row)));
+    }
+    
+    // Check if row has changes compared to original
+    const original = this.originalRecords.get(rowId);
+    const hasChanges = original && Object.keys(row).some(key => row[key] !== original[key]);
+    
+    if (hasChanges) {
+      this.editedRecords.set(rowId, { ...row });
+    } else {
+      this.editedRecords.delete(rowId);
+    }
   }
 
-  onRowEditSave(row: DataRow) {
-    const rowId = row['id'].toString();
-    const originalRow = this.originalRecords.get(rowId);
-    
-    if (originalRow) {
-      // Check if any field has changed
-      let hasChanges = false;
-      for (const key in row) {
-        if (row[key] !== originalRow[key]) {
-          hasChanges = true;
-          break;
+  // Save all edited records to backend
+  async saveAllEdits() {
+    if (this.editedRecords.size === 0) {
+      return;
+    }
+
+    this.saving = true;
+    let successCount = 0;
+    let failCount = 0;
+
+    const editedRecordsArray = Array.from(this.editedRecords.values());
+
+    for (const record of editedRecordsArray) {
+      try {
+        const response = await firstValueFrom(
+          this.dataService.updateCustomerData(record.id, record)
+        );
+
+        if (response && response.success) {
+          successCount++;
+          // Update original record to match saved state
+          this.originalRecords.set(record.id.toString(), { ...record });
+          // Remove from edited records
+          this.editedRecords.delete(record.id.toString());
+        } else {
+          failCount++;
         }
-      }
-      
-      if (hasChanges) {
-        // Store the edited record
-        this.editedRecords.set(rowId, { ...row });
-        console.log('Row saved with changes:', row);
-        console.log('Total edited records:', this.editedRecords.size);
-        console.log('All edited records:', Array.from(this.editedRecords.values()));
-      } else {
-        // No changes, remove from edited records if it was there
-        this.editedRecords.delete(rowId);
-        console.log('Row saved without changes:', row);
+      } catch (error) {
+        failCount++;
+        console.error(`Failed to save record ${record.id}:`, error);
       }
     }
-    
-    // Clean up cloned row
-    delete this.clonedRows[rowId];
-  }
 
-  onRowEditCancel(row: DataRow, index: number) {
-    const rowId = row['id'].toString();
-    
-    // Restore the original values from clone
-    if (this.clonedRows[rowId]) {
-      Object.assign(row, this.clonedRows[rowId]);
-      delete this.clonedRows[rowId];
+    this.saving = false;
+
+    // Show success message
+    if (successCount > 0) {
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Save Complete',
+        detail: `Successfully saved ${successCount} record${successCount > 1 ? 's' : ''}`,
+        life: 3000
+      });
     }
-    
-    console.log('Edit cancelled for row:', row);
+
+    // Show error message if any failed
+    if (failCount > 0) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Save Failed',
+        detail: `Failed to save ${failCount} record${failCount > 1 ? 's' : ''}`,
+        life: 5000
+      });
+    }
   }
 
   // Get all edited records ready for database save
