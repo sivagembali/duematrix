@@ -26,9 +26,11 @@ export class AuthService {
    * Login user with username or email and password
    */
   login(credentials: LoginRequest): Observable<LoginResponse> {
+    console.log('[AuthService] Login attempt for user:', credentials.username);
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials).pipe(
       tap((response) => {
         if (response.success) {
+          console.log('[AuthService] Login successful, storing auth data');
           // Store tokens and user data
           this.storeAuthData(response.data);
         }
@@ -114,22 +116,27 @@ export class AuthService {
    * Store authentication data in localStorage
    */
   private storeAuthData(data: { user: User; access_token: string; refresh_token: string }): void {
+    console.log('[AuthService] Storing auth data for user:', data.user);
     localStorage.setItem('access_token', data.access_token);
     localStorage.setItem('refresh_token', data.refresh_token);
     localStorage.setItem('currentUser', JSON.stringify(data.user));
     this.currentUserSubject.next(data.user);
+    console.log('[AuthService] Auth data stored, currentUserSubject updated');
   }
 
   /**
    * Clear all authentication data
    */
   private clearAuthData(): void {
+    console.log('[AuthService] Clearing all auth data');
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('currentUser');
     localStorage.removeItem('columnHeaders');
+    sessionStorage.clear();
     this.currentUserSubject.next(null);
     this.headersSubject.next([]);
+    console.log('[AuthService] Auth data cleared, currentUserSubject set to null');
   }
 
   /**

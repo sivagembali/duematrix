@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +10,9 @@ import { MessageService } from 'primeng/api';
 import { ColumnHeader, DataRow, CustomerData } from '../../models/data.model';
 import { MockDataGenerator } from '../../services/mock-data.service';
 import { DataService } from '../../services/data.service';
-import { firstValueFrom } from 'rxjs';
+import { CycleService } from '../../services/cycle.service';
+import { AuthService } from '../../services/auth.service';
+import { firstValueFrom, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-user-table',
@@ -19,7 +21,7 @@ import { firstValueFrom } from 'rxjs';
   templateUrl: './user-table.html',
   styleUrl: './user-table.scss',
 })
-export class UserTable implements OnInit {
+export class UserTable implements OnInit, OnDestroy {
   dataset: DataRow[] = [];
   columnHeaders: ColumnHeader[] = [];
   displayedColumns: ColumnHeader[] = [];
@@ -38,17 +40,53 @@ export class UserTable implements OnInit {
   // Track edited records
   editedRecords: Map<string, DataRow> = new Map(); // key: id, value: edited row data
   originalRecords: Map<string, DataRow> = new Map(); // key: id, value: original row data
+  private cycleSubscription?: Subscription;
 
   constructor(
     private mockDataGenerator: MockDataGenerator,
     private dataService: DataService,
     private cdr: ChangeDetectorRef,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private cycleService: CycleService,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
-    // Load column headers from API (via mock data generator)
-    this.columnHeaders = this.mockDataGenerator.generateHeaderMapping();
+    console.log('[UserTable] ngOnInit called');
+    
+    // Load column headers from AuthService (which are loaded by Dashboard from API)
+    // Subscribe to headers to get updates
+    this.authService.headers$.subscribe(headers => {
+      console.log('[UserTable] Headers received from AuthService:', headers.length);
+      if (headers && headers.length > 0) {
+        this.columnHeaders = headers;
+        this.initializeColumnsAndFilters();
+      } else {
+        // Fallback to mock headers if not available yet
+        console.warn('[UserTable] No headers from AuthService, using mock headers');
+        this.columnHeaders = this.mockDataGenerator.generateHeaderMapping();
+        this.initializeColumnsAndFilters();
+      }
+    });
+
+    // Subscribe to cycle selection changes and load data accordingly
+    this.cycleSubscription = this.cycleService.selectedCycle$.subscribe(cycle => {
+      console.log('[UserTable] Cycle changed:', cycle);
+      if (cycle) {
+        console.log('[UserTable] Loading data for cycle:', cycle);
+        this.loadCustomerData(cycle);
+      } else {
+        console.log('[UserTable] No cycle selected, clearing dataset');
+        // No cycle selected yet: clear dataset to avoid an unnecessary API call
+        this.dataset = [];
+        this.filteredDataset = [];
+        this.totalRecords = 0;
+      }
+    });
+  }
+
+  private initializeColumnsAndFilters() {
+    console.log('[UserTable] Initializing columns and filters');
     
     // Store all columns that can be displayed
     this.availableColumns = this.columnHeaders
@@ -61,8 +99,12 @@ export class UserTable implements OnInit {
         return a.display_order - b.display_order;
       });
     
+    console.log('[UserTable] Available columns:', this.availableColumns.length);
+    
     // Initialize selected columns with default_display columns
     this.selectedColumns = this.availableColumns.filter(col => col.default_display);
+    
+    console.log('[UserTable] Selected columns:', this.selectedColumns.length);
     
     // Update displayed columns based on selected columns - frozen first
     this.updateDisplayedColumns();
@@ -75,16 +117,15 @@ export class UserTable implements OnInit {
         this.filterValues[col.col_header] = '';
       }
     });
-
-    // Load customer data from API
-    this.loadCustomerData();
+    
+    console.log('[UserTable] Displayed columns:', this.displayedColumns.length);
   }
 
-  loadCustomerData() {
+  loadCustomerData(cycle?: string) {
     this.loading = true;
     console.log('Starting to load customer data from API...');
     
-    this.dataService.getCustomerData({ per_page: 100 }).subscribe({
+    this.dataService.getCustomerData({ per_page: 100, cycle }).subscribe({
       next: (response) => {
         console.log('API Response received:', response);
         console.log('Response data array length:', response.data?.length);
@@ -112,7 +153,7 @@ export class UserTable implements OnInit {
         console.log('Total Records:', this.totalRecords);
         console.log('Filtered Dataset length:', this.filteredDataset.length);
         
-        // Manually trigger change detection for zoneless mode
+        // Manually trigger change detection to update the view
         this.cdr.detectChanges();
       },
       error: (error) => {
@@ -144,6 +185,12 @@ export class UserTable implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this.cycleSubscription) {
+      this.cycleSubscription.unsubscribe();
+    }
   }
 
   // Transform CustomerData from API to DataRow format

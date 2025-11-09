@@ -10,6 +10,18 @@
         }
       </div>
       <div class="header-right">
+        <div class="cycle-selector" style="display:inline-block; margin-right:1rem;">
+          <label for="cycleSelect" style="margin-right:0.5rem; color: #fff;">Cycle:</label>
+          <select id="cycleSelect" [(ngModel)]="selectedCycle" (change)="onCycleChange(selectedCycle)">
+            @if (cycles.length === 0) {
+              <option value="">Loading...</option>
+            }
+            @for (c of cycles; track c.id) {
+              <option [value]="c.cycle_name">{{ c.cycle_name }}</option>
+            }
+          </select>
+        </div>
+
         <button 
           pButton 
           label="Dashboard" 

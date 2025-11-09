@@ -3,9 +3,9 @@ Data Controller
 Handles customer data CRUD operations and queries
 """
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import CustomerData, User, db
+from models import CustomerData, User, db, Cycle
 from sqlalchemy import or_, and_
 
 data_bp = Blueprint('data', __name__)
@@ -26,6 +26,12 @@ def get_customer_data():
     """
     try:
         current_user = get_jwt_identity()
+        # Diagnostic logging: record who called and which query params were sent
+        try:
+            current_app.logger.info(f"get_customer_data called by: {current_user} args={dict(request.args)}")
+        except Exception:
+            # If logger or current_user isn't available for some reason, fallback to print
+            print(f"get_customer_data called by: {current_user} args={dict(request.args)}")
         
         # Get query parameters
         page = request.args.get('page', 1, type=int)
@@ -34,6 +40,7 @@ def get_customer_data():
         status = request.args.get('status', '', type=str)
         department = request.args.get('department', '', type=str)
         city = request.args.get('city', '', type=str)
+        cycle = request.args.get('cycle', '', type=str)
         
         # Build query
         query = CustomerData.query
@@ -56,17 +63,19 @@ def get_customer_data():
         
         if city:
             query = query.filter(CustomerData.city == city)
+        if cycle:
+            query = query.filter(CustomerData.cycle_name == cycle)
         
         # Order by id descending (most recent first)
         query = query.order_by(CustomerData.id.desc())
         
-        # Paginate
+    # Paginate
         pagination = query.paginate(page=page, per_page=per_page, error_out=False)
         
         # Convert to dictionary
         data = [record.to_dict() for record in pagination.items]
         
-        return jsonify({
+        result = {
             'success': True,
             'message': 'Customer data retrieved successfully',
             'data': data,
@@ -78,7 +87,15 @@ def get_customer_data():
                 'has_next': pagination.has_next,
                 'has_prev': pagination.has_prev
             }
-        }), 200
+        }
+
+        # Log result summary for diagnostics
+        try:
+            current_app.logger.info(f"get_customer_data returning {len(data)} records for user={current_user} cycle={cycle}")
+        except Exception:
+            print(f"get_customer_data returning {len(data)} records for user={current_user} cycle={cycle}")
+
+        return jsonify(result), 200
         
     except Exception as e:
         return jsonify({
@@ -342,4 +359,39 @@ def get_filter_options():
         return jsonify({
             'success': False,
             'message': f'Error retrieving filter options: {str(e)}'
+        }), 500
+
+
+@data_bp.route('/cycles', methods=['GET'])
+@jwt_required()
+def get_cycles():
+    """Return list of cycles from Cycle model"""
+    try:
+        cycles = Cycle.query.order_by(Cycle.start_date.desc()).all()
+        return jsonify({
+            'success': True,
+            'message': 'Cycles retrieved successfully',
+            'data': [c.to_dict() for c in cycles]
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Error retrieving cycles: {str(e)}'
+        }), 500
+
+
+@data_bp.route('/cycles/public', methods=['GET'])
+def get_cycles_public():
+    """Return list of cycles (public endpoint, no authentication required)"""
+    try:
+        cycles = Cycle.query.order_by(Cycle.start_date.desc()).all()
+        return jsonify({
+            'success': True,
+            'message': 'Public cycles retrieved successfully',
+            'data': [c.to_dict() for c in cycles]
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Error retrieving public cycles: {str(e)}'
         }), 500

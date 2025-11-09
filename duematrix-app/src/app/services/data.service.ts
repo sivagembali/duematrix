@@ -26,6 +26,7 @@ export class DataService {
     status?: string;
     department?: string;
     city?: string;
+    cycle?: string;
   }): Observable<CustomerDataResponse> {
     let httpParams = new HttpParams();
     
@@ -36,9 +37,17 @@ export class DataService {
       if (params.status) httpParams = httpParams.set('status', params.status);
       if (params.department) httpParams = httpParams.set('department', params.department);
       if (params.city) httpParams = httpParams.set('city', params.city);
+      if (params.cycle) httpParams = httpParams.set('cycle', params.cycle);
     }
     
     return this.http.get<CustomerDataResponse>(`${this.apiUrl}/customer-data`, { params: httpParams });
+  }
+
+  /**
+   * Get list of cycles (public endpoint)
+   */
+  getCycles(): Observable<{ success: boolean; data: any[] }> {
+    return this.http.get<{ success: boolean; data: any[] }>(`${this.apiUrl}/cycles/public`);
   }
 
   /**
