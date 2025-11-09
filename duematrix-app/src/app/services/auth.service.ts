@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, BehaviorSubject, tap, catchError, of, switchMap } from 'rxjs';
+import { Observable, BehaviorSubject, tap, catchError, of } from 'rxjs';
 import { LoginRequest, LoginResponse, User } from '../models/auth.model';
-import { HeaderService, ColumnHeader } from './header.service';
+import { ColumnHeader } from './header.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,8 +16,7 @@ export class AuthService {
   public headers$ = this.headersSubject.asObservable();
 
   constructor(
-    private http: HttpClient,
-    private headerService: HeaderService
+    private http: HttpClient
   ) {
     // Load user from localStorage on service initialization
     this.loadUserFromStorage();
@@ -25,7 +24,6 @@ export class AuthService {
 
   /**
    * Login user with username or email and password
-   * Also fetches headers after successful login
    */
   login(credentials: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials).pipe(
@@ -34,22 +32,6 @@ export class AuthService {
           // Store tokens and user data
           this.storeAuthData(response.data);
         }
-      }),
-      switchMap((response) => {
-        if (response.success) {
-          // Fetch headers after successful login
-          return this.headerService.getDashboardHeaders().pipe(
-            tap((headerResponse) => {
-              if (headerResponse.success) {
-                this.headersSubject.next(headerResponse.data);
-                localStorage.setItem('columnHeaders', JSON.stringify(headerResponse.data));
-              }
-            }),
-            // Return the original login response
-            switchMap(() => of(response))
-          );
-        }
-        return of(response);
       })
     );
   }

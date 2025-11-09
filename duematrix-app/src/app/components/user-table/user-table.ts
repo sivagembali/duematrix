@@ -1,12 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { ButtonModule } from 'primeng/button';
-import { ColumnHeader, DataRow } from '../../models/data.model';
+import { ColumnHeader, DataRow, CustomerData } from '../../models/data.model';
 import { MockDataGenerator } from '../../services/mock-data.service';
+import { DataService } from '../../services/data.service';
 
 @Component({
   selector: 'app-user-table',
@@ -26,17 +27,22 @@ export class UserTable implements OnInit {
   selectedFilters: { [key: string]: string[] } = {};
   filterValues: { [key: string]: string } = {};
   filteredDataset: DataRow[] = [];
+  loading: boolean = false;
+  totalRecords: number = 0;
   
   // Track edited records
   editedRecords: Map<string, DataRow> = new Map(); // key: id, value: edited row data
   originalRecords: Map<string, DataRow> = new Map(); // key: id, value: original row data
   clonedRows: { [key: string]: DataRow } = {}; // For edit mode cloning
 
-  constructor(private mockDataGenerator: MockDataGenerator) {}
+  constructor(
+    private mockDataGenerator: MockDataGenerator,
+    private dataService: DataService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
-    // Generate 100 records with 50 columns
-    this.dataset = this.mockDataGenerator.generateDataset(100);
+    // Load column headers from API (via mock data generator)
     this.columnHeaders = this.mockDataGenerator.generateHeaderMapping();
     
     // Store all columns that can be displayed
@@ -56,9 +62,6 @@ export class UserTable implements OnInit {
     // Update displayed columns based on selected columns - frozen first
     this.updateDisplayedColumns();
 
-    // Generate filter options for multi-select columns
-    this.generateMultiSelectOptions();
-    
     // Initialize filter objects
     this.displayedColumns.forEach(col => {
       if (col.is_multi_select) {
@@ -68,19 +71,133 @@ export class UserTable implements OnInit {
       }
     });
 
-    // Store original records for comparison
-    this.dataset.forEach(row => {
-      this.originalRecords.set(row['id'].toString(), { ...row });
+    // Load customer data from API
+    this.loadCustomerData();
+  }
+
+  loadCustomerData() {
+    this.loading = true;
+    console.log('Starting to load customer data from API...');
+    
+    this.dataService.getCustomerData({ per_page: 100 }).subscribe({
+      next: (response) => {
+        console.log('API Response received:', response);
+        console.log('Response data array length:', response.data?.length);
+        
+        // Transform CustomerData to DataRow format
+        this.dataset = response.data.map(customer => this.transformCustomerData(customer));
+        this.totalRecords = response.pagination?.total || response.data.length;
+        this.filteredDataset = [...this.dataset];
+        
+        console.log('Transformed dataset:', this.dataset);
+        console.log('Dataset length:', this.dataset.length);
+        console.log('First record:', this.dataset[0]);
+        
+        // Store original records for comparison
+        this.dataset.forEach(row => {
+          this.originalRecords.set(row['id'].toString(), { ...row });
+        });
+
+        // Generate filter options for multi-select columns
+        this.generateMultiSelectOptions();
+        
+        this.loading = false;
+        
+        console.log('✅ Customer data loaded successfully!');
+        console.log('Total Records:', this.totalRecords);
+        console.log('Filtered Dataset length:', this.filteredDataset.length);
+        
+        // Manually trigger change detection for zoneless mode
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('❌ Error loading customer data:', error);
+        console.error('Error status:', error.status);
+        console.error('Error message:', error.message);
+        console.error('Error details:', error.error);
+        
+        this.loading = false;
+        
+        // Fallback to mock data on error
+        console.warn('⚠️ Falling back to mock data generator');
+        this.dataset = this.mockDataGenerator.generateDataset(100);
+        this.filteredDataset = [...this.dataset];
+        
+        console.log('Mock dataset length:', this.dataset.length);
+        
+        // Store original records for comparison
+        this.dataset.forEach(row => {
+          this.originalRecords.set(row['id'].toString(), { ...row });
+        });
+
+        // Generate filter options for multi-select columns
+        this.generateMultiSelectOptions();
+        
+        console.log('Using Mock Data - Total:', this.dataset.length);
+        
+        // Manually trigger change detection for zoneless mode
+        this.cdr.detectChanges();
+      }
     });
+  }
 
-    this.filteredDataset = [...this.dataset];
-
-    console.log('Generated Dataset:', this.dataset);
-    console.log('Column Headers:', this.columnHeaders);
-    console.log('Frozen Columns:', this.frozenColumns);
-    console.log('Scrollable Columns:', this.scrollableColumns);
-    console.log('Displayed Columns (default_display=true):', this.displayedColumns);
-    console.log('MultiSelect Options:', this.multiSelectOptions);
+  // Transform CustomerData from API to DataRow format
+  private transformCustomerData(customer: CustomerData): DataRow {
+    return {
+      id: customer.id,
+      user_id: customer.user_id,
+      customer_name: customer.customer_name,
+      email: customer.email,
+      phone_number: customer.phone_number,
+      date_of_birth: customer.date_of_birth,
+      blood_group: customer.blood_group,
+      nationality: customer.nationality,
+      marital_status: customer.marital_status,
+      spouse_name: customer.spouse_name,
+      children_count: customer.children_count,
+      emergency_contact: customer.emergency_contact,
+      current_address: customer.current_address,
+      city: customer.city,
+      state: customer.state,
+      postal_code: customer.postal_code,
+      country: customer.country,
+      credit_card_no: customer.credit_card_no,
+      account_balance: customer.account_balance?.toString(),
+      account_type: customer.account_type,
+      bank: customer.bank,
+      bank_name: customer.bank_name,
+      bank_account_no: customer.bank_account_no,
+      ifsc_code: customer.ifsc_code,
+      branch_name: customer.branch_name,
+      pan_number: customer.pan_number,
+      aadhar_number: customer.aadhar_number,
+      annual_income: customer.annual_income?.toString(),
+      tax_regime: customer.tax_regime,
+      insurance_policy_no: customer.insurance_policy_no,
+      employee_id: customer.employee_id,
+      department: customer.department,
+      status: customer.status,
+      salary: customer.salary?.toString(),
+      hire_date: customer.hire_date,
+      manager_name: customer.manager_name,
+      work_location: customer.work_location,
+      remote_work_eligible: customer.remote_work_eligible,
+      project_name: customer.project_name,
+      project_code: customer.project_code,
+      cycle_name: customer.cycle_name,
+      skill_set: customer.skill_set,
+      experience_years: customer.experience_years,
+      education: customer.education,
+      certification: customer.certification,
+      performance_rating: customer.performance_rating?.toString(),
+      last_appraisal_date: customer.last_appraisal_date,
+      next_appraisal_date: customer.next_appraisal_date,
+      vehicle_type: customer.vehicle_type,
+      vehicle_number: customer.vehicle_number,
+      registration_date: customer.registration_date,
+      last_login: customer.last_login,
+      notes: customer.notes
+    };
   }
 
   // Update displayed columns - frozen first, then scrollable

@@ -7,5 +7,6 @@ db = SQLAlchemy()
 from .header_model import ColumnHeader
 from .user_model import User
 from .role_model import RoleMaster, RoleMapping
+from .customer_data_model import CustomerData
 
 __all__ = ['db', 'ColumnHeader', 'User', 'RoleMaster', 'RoleMapping']

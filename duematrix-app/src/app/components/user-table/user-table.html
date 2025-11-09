@@ -5,6 +5,9 @@
     <p><strong>Edited Records:</strong> <span [class.has-changes]="editedRecords.size > 0">{{ editedRecords.size }}</span></p>
     <p><strong>Total Columns:</strong> {{ columnHeaders.length }}</p>
     <p><strong>Displayed Columns:</strong> {{ displayedColumns.length }}</p>
+    @if (loading) {
+      <p><strong>Status:</strong> <span style="color: orange;">Loading data from API...</span></p>
+    }
     <div class="controls-inline">
       <div class="column-selector">
         <label for="columnSelect">Select Columns:</label>
@@ -32,6 +35,21 @@
     </div>
   </div>
 
+  @if (loading) {
+    <div style="padding: 2rem; text-align: center; color: #666;">
+      <i class="pi pi-spin pi-spinner" style="font-size: 2rem;"></i>
+      <p>Loading customer data from API...</p>
+    </div>
+  }
+
+  @if (!loading && filteredDataset.length === 0) {
+    <div style="padding: 2rem; text-align: center; color: #999;">
+      <i class="pi pi-inbox" style="font-size: 3rem;"></i>
+      <p>No data available</p>
+    </div>
+  }
+
+  @if (!loading && filteredDataset.length > 0) {
   <p-table 
     [value]="filteredDataset" 
     [scrollable]="true" 
@@ -127,4 +145,5 @@
       </tr>
     </ng-template>
   </p-table>
+  }
 </div>

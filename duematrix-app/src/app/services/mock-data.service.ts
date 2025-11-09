@@ -69,18 +69,21 @@ export class MockDataGenerator {
       { col_header: 'insurance_policy_no', col_label: 'Insurance Policy No', is_editable: true, is_multi_select: false, col_width: 15, display: true, default_display: false, is_frozen: false, display_order: 36 },
       { col_header: 'pan_number', col_label: 'PAN Number', is_editable: true, is_multi_select: false, col_width: 12, display: true, default_display: false, is_frozen: false, display_order: 37 },
       { col_header: 'aadhar_number', col_label: 'Aadhar Number', is_editable: true, is_multi_select: false, col_width: 12, display: true, default_display: false, is_frozen: false, display_order: 38 },
-      { col_header: 'bank_name', col_label: 'Bank Name', is_editable: true, is_multi_select: false, col_width: 15, display: true, default_display: false, is_frozen: false, display_order: 39 },
-      { col_header: 'bank_account_no', col_label: 'Bank Account No', is_editable: true, is_multi_select: false, col_width: 15, display: true, default_display: false, is_frozen: false, display_order: 40 },
-      { col_header: 'ifsc_code', col_label: 'IFSC Code', is_editable: true, is_multi_select: false, col_width: 10, display: true, default_display: false, is_frozen: false, display_order: 41 },
-      { col_header: 'branch_name', col_label: 'Branch Name', is_editable: true, is_multi_select: false, col_width: 15, display: true, default_display: false, is_frozen: false, display_order: 42 },
-      { col_header: 'annual_income', col_label: 'Annual Income', is_editable: true, is_multi_select: false, col_width: 12, display: true, default_display: false, is_frozen: false, display_order: 43 },
-      { col_header: 'tax_regime', col_label: 'Tax Regime', is_editable: true, is_multi_select: true, col_width: 10, display: true, default_display: false, is_frozen: false, display_order: 44 },
-      { col_header: 'performance_rating', col_label: 'Performance Rating', is_editable: true, is_multi_select: false, col_width: 12, display: true, default_display: false, is_frozen: false, display_order: 45 },
-      { col_header: 'last_appraisal_date', col_label: 'Last Appraisal Date', is_editable: false, is_multi_select: false, col_width: 12, display: true, default_display: false, is_frozen: false, display_order: 46 },
-      { col_header: 'next_appraisal_date', col_label: 'Next Appraisal Date', is_editable: false, is_multi_select: false, col_width: 12, display: true, default_display: false, is_frozen: false, display_order: 47 },
-      { col_header: 'work_location', col_label: 'Work Location', is_editable: true, is_multi_select: true, col_width: 15, display: true, default_display: false, is_frozen: false, display_order: 48 },
-      { col_header: 'remote_work_eligible', col_label: 'Remote Work Eligible', is_editable: true, is_multi_select: false, col_width: 10, display: true, default_display: false, is_frozen: false, display_order: 49 },
-      { col_header: 'notes', col_label: 'Notes', is_editable: true, is_multi_select: false, col_width: 20, display: true, default_display: false, is_frozen: false, display_order: 50 }
+      { col_header: 'bank', col_label: 'Bank', is_editable: true, is_multi_select: true, col_width: 15, display: true, default_display: true, is_frozen: false, display_order: 39 },
+      { col_header: 'bank_name', col_label: 'Bank Name', is_editable: true, is_multi_select: false, col_width: 15, display: true, default_display: false, is_frozen: false, display_order: 40 },
+      { col_header: 'bank_account_no', col_label: 'Bank Account No', is_editable: true, is_multi_select: false, col_width: 15, display: true, default_display: false, is_frozen: false, display_order: 41 },
+      { col_header: 'ifsc_code', col_label: 'IFSC Code', is_editable: true, is_multi_select: false, col_width: 10, display: true, default_display: false, is_frozen: false, display_order: 42 },
+      { col_header: 'branch_name', col_label: 'Branch Name', is_editable: true, is_multi_select: false, col_width: 15, display: true, default_display: false, is_frozen: false, display_order: 43 },
+      { col_header: 'annual_income', col_label: 'Annual Income', is_editable: true, is_multi_select: false, col_width: 12, display: true, default_display: false, is_frozen: false, display_order: 44 },
+      { col_header: 'tax_regime', col_label: 'Tax Regime', is_editable: true, is_multi_select: true, col_width: 10, display: true, default_display: false, is_frozen: false, display_order: 45 },
+      { col_header: 'performance_rating', col_label: 'Performance Rating', is_editable: true, is_multi_select: false, col_width: 12, display: true, default_display: false, is_frozen: false, display_order: 46 },
+      { col_header: 'last_appraisal_date', col_label: 'Last Appraisal Date', is_editable: false, is_multi_select: false, col_width: 12, display: true, default_display: false, is_frozen: false, display_order: 47 },
+      { col_header: 'next_appraisal_date', col_label: 'Next Appraisal Date', is_editable: false, is_multi_select: false, col_width: 12, display: true, default_display: false, is_frozen: false, display_order: 48 },
+      { col_header: 'work_location', col_label: 'Work Location', is_editable: true, is_multi_select: true, col_width: 15, display: true, default_display: false, is_frozen: false, display_order: 49 },
+      { col_header: 'remote_work_eligible', col_label: 'Remote Work Eligible', is_editable: true, is_multi_select: false, col_width: 10, display: true, default_display: false, is_frozen: false, display_order: 50 },
+      { col_header: 'cycle_name', col_label: 'Cycle Name', is_editable: true, is_multi_select: true, col_width: 12, display: true, default_display: true, is_frozen: false, display_order: 51 },
+      { col_header: 'user_id', col_label: 'User ID', is_editable: false, is_multi_select: false, col_width: 8, display: true, default_display: false, is_frozen: false, display_order: 52 },
+      { col_header: 'notes', col_label: 'Notes', is_editable: true, is_multi_select: false, col_width: 20, display: true, default_display: false, is_frozen: false, display_order: 53 }
     ];
 
     return headers;
@@ -92,6 +95,7 @@ export class MockDataGenerator {
     for (let i = 1; i <= count; i++) {
       data.push({
         id: i,
+        user_id: Math.random() > 0.5 ? Math.floor(Math.random() * 10) + 1 : null,
         customer_name: `${this.getRandomItem(MockDataGenerator.FIRST_NAMES)} ${this.getRandomItem(MockDataGenerator.LAST_NAMES)}`,
         credit_card_no: this.generateCreditCard(),
         current_address: this.generateAddress(),
@@ -114,6 +118,7 @@ export class MockDataGenerator {
         manager_name: `${this.getRandomItem(MockDataGenerator.FIRST_NAMES)} ${this.getRandomItem(MockDataGenerator.LAST_NAMES)}`,
         project_name: `Project ${this.getRandomItem(['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon'])}`,
         project_code: `PRJ${String(Math.floor(Math.random() * 1000)).padStart(4, '0')}`,
+        cycle_name: this.getRandomItem(['Q1-2024', 'Q2-2024', 'Q3-2024', 'Q4-2024', 'Q1-2025', 'H1-2024', 'H2-2024', 'FY2024', 'FY2025']),
         skill_set: this.getRandomItem(['Java, Python', 'React, Angular', 'DevOps, AWS', 'Data Science, ML']),
         experience_years: Math.floor(Math.random() * 20) + 1,
         education: this.getRandomItem(['B.Tech', 'M.Tech', 'MBA', 'MCA', 'B.Sc', 'M.Sc']),
@@ -129,6 +134,7 @@ export class MockDataGenerator {
         insurance_policy_no: `INS${String(Math.floor(Math.random() * 1000000)).padStart(8, '0')}`,
         pan_number: this.generatePAN(),
         aadhar_number: this.generateAadhar(),
+        bank: this.getRandomItem(['HDFC Bank', 'ICICI Bank', 'State Bank of India', 'Axis Bank', 'Kotak Mahindra Bank', 'Punjab National Bank']),
         bank_name: this.getRandomItem(['HDFC Bank', 'ICICI Bank', 'SBI', 'Axis Bank', 'Kotak Mahindra']),
         bank_account_no: this.generateAccountNumber(),
         ifsc_code: `${this.getRandomItem(['HDFC', 'ICIC', 'SBIN', 'UTIB', 'KKBK'])}0${String(Math.floor(Math.random() * 100000)).padStart(6, '0')}`,
