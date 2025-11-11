@@ -13,9 +13,9 @@ def seed_cycles():
         return
 
     cycles = [
-        Cycle(cycle_name='2025-Q1', start_date=date(2025, 1, 1), end_date=date(2025, 3, 31), status='active'),
-        Cycle(cycle_name='2025-Q2', start_date=date(2025, 4, 1), end_date=date(2025, 6, 30), status='upcoming'),
-        Cycle(cycle_name='2024-FY', start_date=date(2024, 4, 1), end_date=date(2025, 3, 31), status='closed'),
+        Cycle(cycle_name='Q1-2025', start_date=date(2025, 1, 1), end_date=date(2025, 3, 31), status='active'),
+        Cycle(cycle_name='Q2-2025', start_date=date(2025, 4, 1), end_date=date(2025, 6, 30), status='upcoming'),
+        Cycle(cycle_name='Q3-2025', start_date=date(2025, 7, 1), end_date=date(2025, 9, 30), status='upcoming'),
     ]
 
     for c in cycles:

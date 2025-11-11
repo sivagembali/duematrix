@@ -17,7 +17,7 @@ STATES = ['Maharashtra', 'Karnataka', 'Tamil Nadu', 'Gujarat', 'West Bengal', 'T
 DEPARTMENTS = ['Engineering', 'Sales', 'Marketing', 'HR', 'Finance', 'Operations', 'IT', 'Support']
 STATUSES = ['Active', 'Inactive', 'Pending', 'Completed', 'In Progress']
 BANKS = ['HDFC Bank', 'ICICI Bank', 'State Bank of India', 'Axis Bank', 'Kotak Mahindra Bank', 'Punjab National Bank']
-CYCLES = ['Q1-2024', 'Q2-2024', 'Q3-2024', 'Q4-2024', 'Q1-2025', 'H1-2024', 'H2-2024', 'FY2024', 'FY2025']
+CYCLES = ['Q1-2025', 'Q2-2025', 'Q3-2025']
 
 
 def random_item(items):
