@@ -1,0 +1,138 @@
+<div class="header-mapping-container">
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <p-card>
+    <div class="header-section">
+      <h2>Header Mapping</h2>
+      <button pButton label="Add Header" icon="pi pi-plus" class="p-button-success" (click)="openCreate()"></button>
+    </div>
+
+    <p-table [value]="filteredHeaders" [loading]="loading" [paginator]="true" [rows]="10" styleClass="p-datatable-gridlines" [showCurrentPageReport]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} headers" [globalFilterFields]="['col_header', 'col_label']">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>ID</th>
+          <th>
+            <div>Header Key</div>
+            <input pInputText type="text" (input)="filterHeaders($event, 'col_header')" placeholder="Search key" style="width:100%; margin-top:0.5rem;" />
+          </th>
+          <th>
+            <div>Label</div>
+            <input pInputText type="text" (input)="filterHeaders($event, 'col_label')" placeholder="Search label" style="width:100%; margin-top:0.5rem;" />
+          </th>
+          <th>Editable</th>
+          <th>Multi-Select</th>
+          <th>Width</th>
+          <th>Display</th>
+          <th>Default Display</th>
+          <th>Frozen</th>
+          <th>Order</th>
+          <th>Role ID</th>
+          <th>Created At</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-h>
+        <tr>
+          <td>{{ h.id }}</td>
+          <td><strong>{{ h.col_header }}</strong></td>
+          <td>{{ h.col_label || '—' }}</td>
+          <td>
+            <p-tag [value]="h.is_editable ? 'Yes' : 'No'" [severity]="getEditableSeverity(h.is_editable)"></p-tag>
+          </td>
+          <td>
+            <p-tag [value]="h.is_multi_select ? 'Yes' : 'No'" [severity]="getEditableSeverity(h.is_multi_select)"></p-tag>
+          </td>
+          <td>{{ h.col_width }}</td>
+          <td>
+            <p-tag [value]="h.display ? 'Yes' : 'No'" [severity]="getDisplaySeverity(h.display)"></p-tag>
+          </td>
+          <td>
+            <p-tag [value]="h.default_display ? 'Yes' : 'No'" [severity]="getDisplaySeverity(h.default_display)"></p-tag>
+          </td>
+          <td>
+            <p-tag [value]="h.is_frozen ? 'Yes' : 'No'" [severity]="getEditableSeverity(h.is_frozen)"></p-tag>
+          </td>
+          <td>{{ h.display_order }}</td>
+          <td>{{ h.role_id || '—' }}</td>
+          <td>{{ h.created_at | date:'short' }}</td>
+          <td>
+            <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-warning" (click)="openEdit(h)"></button>
+            <button pButton icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger" (click)="confirmDelete(h)"></button>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="13" style="text-align:center">No headers found</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+
+  <p-dialog [(visible)]="showDialog" [modal]="true" [header]="dialogMode === 'create' ? 'Create Header' : 'Edit Header'" [style]="{width:'600px'}">
+    <div class="dialog-content">
+      <div class="form-field">
+        <label for="colHeader">Header Key *</label>
+        <input id="colHeader" type="text" pInputText [(ngModel)]="col_header" placeholder="e.g., customer_name" />
+      </div>
+
+      <div class="form-field">
+        <label for="colLabel">Label</label>
+        <input id="colLabel" type="text" pInputText [(ngModel)]="col_label" placeholder="e.g., Customer Name" />
+      </div>
+
+      <div class="form-field">
+        <label for="colWidth">Column Width</label>
+        <input id="colWidth" type="number" pInputText [(ngModel)]="col_width" placeholder="e.g., 150" />
+      </div>
+
+      <div class="form-field">
+        <label for="displayOrder">Display Order</label>
+        <input id="displayOrder" type="number" pInputText [(ngModel)]="display_order" placeholder="e.g., 1" />
+      </div>
+
+      <div class="form-field">
+        <label for="roleId">Role ID (optional)</label>
+        <input id="roleId" type="number" pInputText [(ngModel)]="role_id" placeholder="Leave empty for all roles" />
+      </div>
+
+      <div class="form-field checkbox-field">
+        <label>Editable</label>
+        <input type="checkbox" [(ngModel)]="is_editable" />
+        <span class="checkbox-label">{{ is_editable ? 'Yes' : 'No' }}</span>
+      </div>
+
+      <div class="form-field checkbox-field">
+        <label>Multi-Select</label>
+        <input type="checkbox" [(ngModel)]="is_multi_select" />
+        <span class="checkbox-label">{{ is_multi_select ? 'Yes' : 'No' }}</span>
+      </div>
+
+      <div class="form-field checkbox-field">
+        <label>Display</label>
+        <input type="checkbox" [(ngModel)]="display" />
+        <span class="checkbox-label">{{ display ? 'Yes' : 'No' }}</span>
+      </div>
+
+      <div class="form-field checkbox-field">
+        <label>Default Display</label>
+        <input type="checkbox" [(ngModel)]="default_display" />
+        <span class="checkbox-label">{{ default_display ? 'Yes' : 'No' }}</span>
+      </div>
+
+      <div class="form-field checkbox-field">
+        <label>Frozen</label>
+        <input type="checkbox" [(ngModel)]="is_frozen" />
+        <span class="checkbox-label">{{ is_frozen ? 'Yes' : 'No' }}</span>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button pButton label="Cancel" class="p-button-text" (click)="cancel()"></button>
+      <button pButton label="Save" icon="pi pi-check" (click)="save()" [loading]="loading"></button>
+    </ng-template>
+  </p-dialog>
+</div>

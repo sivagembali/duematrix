@@ -1,0 +1,19 @@
+.header-mapping-container {
+  padding: 1rem;
+
+  ::ng-deep .p-card {
+    .p-card-body { padding: 1.25rem; }
+  }
+}
+
+.header-section { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
+
+.dialog-content { padding: 1rem 0; }
+
+.form-field { margin-bottom:1rem; label{ display:block; margin-bottom:0.5rem; font-weight:600; } }
+
+.checkbox-field { display:flex; align-items:center; gap:0.5rem; .checkbox-label{ color:#6b7280; } }
+
+::ng-deep { .p-datatable-thead > tr > th { background:#f9fafb; font-weight:600; } }
+
+@media(max-width:768px) { .header-mapping-container{ padding:0.75rem; } }
