@@ -50,6 +50,54 @@
     gap: 0.5rem;
     align-items: center;
 
+    .cycle-selector {
+      position: relative;
+      display: inline-block;
+      vertical-align: middle;
+
+      label {
+        font-weight: 600;
+        margin-right: 0.4rem;
+        color: rgba(255,255,255,0.95);
+      }
+
+      select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background: #ffffff;
+        color: #333333;
+        padding: 0.28rem 1.6rem 0.28rem 0.6rem;
+        border-radius: 6px;
+        border: 0;
+        min-width: 110px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+      }
+
+      /* Custom arrow */
+      &::after {
+        content: '';
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 0;
+        height: 0;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-top: 6px solid #555;
+        pointer-events: none;
+      }
+
+      select:focus {
+        outline: 2px solid rgba(102,126,234,0.3);
+        outline-offset: 2px;
+      }
+    }
+
     ::ng-deep .p-button {
       &.p-button-text {
         color: white;
