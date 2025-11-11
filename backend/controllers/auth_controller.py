@@ -203,6 +203,25 @@ def login():
         }), 500
 
 
+# Temporary debug endpoint - returns non-sensitive user existence info
+# REMOVE or protect this in production once debugging is complete
+@auth_bp.route('/debug/user/<string:username>', methods=['GET'])
+def debug_user(username):
+    try:
+        user = User.query.filter_by(username=username).first()
+        if not user:
+            return jsonify({'exists': False}), 200
+        return jsonify({
+            'exists': True,
+            'username': user.username,
+            'is_active': user.is_active,
+            'is_verified': user.is_verified,
+            'created_at': user.created_at.isoformat() + 'Z' if user.created_at else None
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @auth_bp.route('/refresh', methods=['POST'])
 @jwt_required(refresh=True)
 def refresh():
