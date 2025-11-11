@@ -45,33 +45,51 @@ except Exception as e:
 try:
     print("2. Seeding headers...")
     import seed_comprehensive_headers
-    try:
-        seed_comprehensive_headers.main()
-        print("✓ Headers seeded")
-    except Exception as e:
-        print(f"Error running seed_comprehensive_headers.main(): {e}")
+        # Try to run the module's main(), otherwise call known seed function
+        try:
+            if hasattr(seed_comprehensive_headers, 'main'):
+                seed_comprehensive_headers.main()
+            elif hasattr(seed_comprehensive_headers, 'seed_comprehensive_headers'):
+                seed_comprehensive_headers.seed_comprehensive_headers()
+            else:
+                raise AttributeError('No entry function found in seed_comprehensive_headers')
+            print("✓ Headers seeded")
+        except Exception as e:
+            print(f"Error running seed_comprehensive_headers: {e}")
 except Exception as e:
     print(f"Error seeding headers: {e}")
 
 try:
     print("3. Seeding cycles...")
     import seed_cycles
-    try:
-        seed_cycles.main()
-        print("✓ Cycles seeded")
-    except Exception as e:
-        print(f"Error running seed_cycles.main(): {e}")
+        try:
+            if hasattr(seed_cycles, 'main'):
+                seed_cycles.main()
+            elif hasattr(seed_cycles, 'seed_cycles'):
+                # Ensure app context is present
+                seed_cycles.seed_cycles()
+            else:
+                raise AttributeError('No entry function found in seed_cycles')
+            print("✓ Cycles seeded")
+        except Exception as e:
+            print(f"Error running seed_cycles: {e}")
 except Exception as e:
     print(f"Error seeding cycles: {e}")
 
 try:
     print("4. Seeding customer data...")
     import seed_customer_data
-    try:
-        seed_customer_data.main()
-        print("✓ Customer data seeded")
-    except Exception as e:
-        print(f"Error running seed_customer_data.main(): {e}")
+        try:
+            if hasattr(seed_customer_data, 'main'):
+                seed_customer_data.main()
+            elif hasattr(seed_customer_data, 'seed_customer_data'):
+                # default to 100 records
+                seed_customer_data.seed_customer_data(100)
+            else:
+                raise AttributeError('No entry function found in seed_customer_data')
+            print("✓ Customer data seeded")
+        except Exception as e:
+            print(f"Error running seed_customer_data: {e}")
 except Exception as e:
     print(f"Error seeding customer data: {e}")
 

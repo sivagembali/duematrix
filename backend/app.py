@@ -73,21 +73,36 @@ def create_app(config_name=None):
 
             import seed_comprehensive_headers
             try:
-                seed_comprehensive_headers.main()
+                if hasattr(seed_comprehensive_headers, 'main'):
+                    seed_comprehensive_headers.main()
+                elif hasattr(seed_comprehensive_headers, 'seed_comprehensive_headers'):
+                    seed_comprehensive_headers.seed_comprehensive_headers()
+                else:
+                    raise AttributeError('No entry function found in seed_comprehensive_headers')
                 results['headers'] = 'seeded'
             except Exception as e:
                 results['headers'] = f'error: {str(e)}'
 
             import seed_cycles
             try:
-                seed_cycles.main()
+                if hasattr(seed_cycles, 'main'):
+                    seed_cycles.main()
+                elif hasattr(seed_cycles, 'seed_cycles'):
+                    seed_cycles.seed_cycles()
+                else:
+                    raise AttributeError('No entry function found in seed_cycles')
                 results['cycles'] = 'seeded'
             except Exception as e:
                 results['cycles'] = f'error: {str(e)}'
 
             import seed_customer_data
             try:
-                seed_customer_data.main()
+                if hasattr(seed_customer_data, 'main'):
+                    seed_customer_data.main()
+                elif hasattr(seed_customer_data, 'seed_customer_data'):
+                    seed_customer_data.seed_customer_data(100)
+                else:
+                    raise AttributeError('No entry function found in seed_customer_data')
                 results['customer_data'] = 'seeded'
             except Exception as e:
                 results['customer_data'] = f'error: {str(e)}'
