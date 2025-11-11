@@ -35,10 +35,10 @@ git push origin duematrix
    - **Name**: `duematrix-api`
    - **Region**: Same as database
    - **Branch**: `duematrix`
-   - **Root Directory**: Leave empty
+   - **Root Directory**: `backend`
    - **Runtime**: Python 3
-   - **Build Command**: `pip install -r backend/requirements.txt`
-   - **Start Command**: `gunicorn backend.app:app --workers 3 --timeout 120`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `gunicorn app:app --workers 3 --timeout 120 --bind 0.0.0.0:$PORT`
    - **Plan**: Free
 
 4. **Environment Variables** - Add these:
