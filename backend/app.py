@@ -62,20 +62,36 @@ def create_app(config_name=None):
         """Initialize database with seed data (use once after deployment)"""
         try:
             results = {}
-            
-            # Import seed modules
+
+            # Import and run seed modules' main() functions so they actually execute
             import seed_roles_users
-            results['roles_users'] = 'seeded'
-            
+            try:
+                seed_roles_users.main()
+                results['roles_users'] = 'seeded'
+            except Exception as e:
+                results['roles_users'] = f'error: {str(e)}'
+
             import seed_comprehensive_headers
-            results['headers'] = 'seeded'
-            
+            try:
+                seed_comprehensive_headers.main()
+                results['headers'] = 'seeded'
+            except Exception as e:
+                results['headers'] = f'error: {str(e)}'
+
             import seed_cycles
-            results['cycles'] = 'seeded'
-            
+            try:
+                seed_cycles.main()
+                results['cycles'] = 'seeded'
+            except Exception as e:
+                results['cycles'] = f'error: {str(e)}'
+
             import seed_customer_data
-            results['customer_data'] = 'seeded'
-            
+            try:
+                seed_customer_data.main()
+                results['customer_data'] = 'seeded'
+            except Exception as e:
+                results['customer_data'] = f'error: {str(e)}'
+
             return {
                 'success': True,
                 'message': 'Database initialized successfully',
