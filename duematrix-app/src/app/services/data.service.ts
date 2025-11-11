@@ -7,12 +7,13 @@ import {
   SingleCustomerDataResponse,
   FilterOptionsResponse 
 } from '../models/data.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DataService {
-  private apiUrl = 'http://localhost:5000/api/data';
+  private apiUrl = `${environment.apiUrl}/data`;
 
   constructor(private http: HttpClient) {}
 

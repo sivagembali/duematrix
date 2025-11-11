@@ -12,15 +12,23 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
     
     # Database Configuration
-    DB_TYPE = os.getenv('DB_TYPE', 'postgresql')
-    DB_USERNAME = os.getenv('DB_USERNAME', 'postgres')
-    DB_PASSWORD = os.getenv('DB_PASSWORD', 'root')
-    DB_HOST = os.getenv('DB_HOST', 'localhost')
-    DB_PORT = os.getenv('DB_PORT', '5432')
-    DB_NAME = os.getenv('DB_NAME', 'duematrix')
+    # Render provides DATABASE_URL directly, fallback to individual components for local dev
+    DATABASE_URL = os.getenv('DATABASE_URL')
     
-    # SQLAlchemy Configuration
-    SQLALCHEMY_DATABASE_URI = f"{DB_TYPE}://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    if DATABASE_URL:
+        # Render/Production: Use DATABASE_URL directly
+        # Fix postgres:// to postgresql:// for SQLAlchemy compatibility
+        SQLALCHEMY_DATABASE_URI = DATABASE_URL.replace('postgres://', 'postgresql://')
+    else:
+        # Local development: Build from components
+        DB_TYPE = os.getenv('DB_TYPE', 'postgresql')
+        DB_USERNAME = os.getenv('DB_USERNAME', 'postgres')
+        DB_PASSWORD = os.getenv('DB_PASSWORD', 'root')
+        DB_HOST = os.getenv('DB_HOST', 'localhost')
+        DB_PORT = os.getenv('DB_PORT', '5432')
+        DB_NAME = os.getenv('DB_NAME', 'duematrix')
+        SQLALCHEMY_DATABASE_URI = f"{DB_TYPE}://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = True  # Set to False in production
     

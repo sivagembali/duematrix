@@ -14,7 +14,7 @@ export class ConfigLayoutComponent implements OnInit {
   menuItems = [
     { label: 'User Management', icon: 'pi pi-users', route: '/config/users' },
     { label: 'Role Management', icon: 'pi pi-key', route: '/config/roles' },
-    { label: 'Header Mapping', icon: 'pi pi-columns', route: '/config/headers' }
+    { label: 'Header Mapping', icon: 'pi pi-table', route: '/config/headers' }
   ];
 
   constructor() {}
