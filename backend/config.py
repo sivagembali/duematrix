@@ -40,6 +40,19 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = True  # Set to False in production
     
+    # SQLAlchemy Engine Options - Force SSL for production databases
+    SQLALCHEMY_ENGINE_OPTIONS = {}
+    if DATABASE_URL:
+        # For hosted Postgres (Render), ensure SSL is properly configured
+        SQLALCHEMY_ENGINE_OPTIONS = {
+            'connect_args': {
+                'sslmode': 'require',
+                'connect_timeout': 10
+            },
+            'pool_pre_ping': True,  # Verify connections before using them
+            'pool_recycle': 300,    # Recycle connections after 5 minutes
+        }
+    
     # JWT Configuration
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'jwt-secret-key-change-in-production')
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(seconds=int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES', 3600)))
