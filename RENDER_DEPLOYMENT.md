@@ -94,13 +94,41 @@ ng build --configuration production
 
 ## Step 6: Initialize Database
 
-After backend is deployed, run migrations:
+### Option A: Using API Endpoint (Free Tier - Recommended)
+
+The easiest way is to trigger database initialization via an API endpoint:
+
+1. After backend is deployed, visit this URL in your browser:
+   ```
+   https://duematrix-api.onrender.com/init-db
+   ```
+   
+2. You should see a JSON response with initialization status
+
+### Option B: One-Time Job (Free Tier)
+
+1. In Render dashboard, click **New +** → **Job**
+2. Connect your GitHub repository
+3. Fill in:
+   - **Name**: `duematrix-db-init`
+   - **Region**: Same as backend
+   - **Branch**: `duematrix`
+   - **Root Directory**: `backend`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `python init_db.py`
+   - **Plan**: Free
+4. Add the same environment variables as backend (DATABASE_URL, FLASK_ENV, JWT_SECRET_KEY)
+5. Click **Create Job**
+6. Click **Run Job** to execute once
+
+### Option C: Shell Access (Requires Paid Tier)
+
+Shell access requires upgrading to Starter tier ($7/month):
 
 1. In Render dashboard, go to your `duematrix-api` service
-2. Click **Shell** tab
+2. Click **Shell** tab (requires upgrade)
 3. Run:
    ```bash
-   cd backend
    flask db upgrade
    python seed_roles_users.py
    python seed_comprehensive_headers.py

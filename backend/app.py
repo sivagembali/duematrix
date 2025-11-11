@@ -50,6 +50,36 @@ def create_app(config_name=None):
     def health():
         return {'status': 'healthy', 'database': 'connected'}
     
+    @app.route('/init-db')
+    def init_database():
+        """Initialize database with seed data (use once after deployment)"""
+        try:
+            results = {}
+            
+            # Import seed modules
+            import seed_roles_users
+            results['roles_users'] = 'seeded'
+            
+            import seed_comprehensive_headers
+            results['headers'] = 'seeded'
+            
+            import seed_cycles
+            results['cycles'] = 'seeded'
+            
+            import seed_customer_data
+            results['customer_data'] = 'seeded'
+            
+            return {
+                'success': True,
+                'message': 'Database initialized successfully',
+                'results': results
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'message': f'Error initializing database: {str(e)}'
+            }, 500
+    
     return app
 
 
