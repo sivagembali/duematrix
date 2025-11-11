@@ -1,0 +1,147 @@
+<div class="reports-container">
+  <div class="reports-header">
+    <h1>Admin Reports & Analytics</h1>
+    <p class="subtitle">Comprehensive analysis of customer data</p>
+    <button 
+      pButton 
+      label="Refresh" 
+      icon="pi pi-refresh"
+      class="p-button-sm"
+      (click)="refreshReports()"
+      [loading]="loading">
+    </button>
+  </div>
+
+  @if (loading) {
+    <div class="loading-spinner">
+      <i class="pi pi-spin pi-spinner" style="font-size: 2rem;"></i>
+      <p>Loading reports...</p>
+    </div>
+  }
+
+  @if (!loading) {
+    <div class="reports-grid">
+      <!-- Summary Card -->
+      <p-card styleClass="summary-card">
+        <ng-template pTemplate="header">
+          <div class="card-header">
+            <h2>Summary</h2>
+          </div>
+        </ng-template>
+        <div class="summary-content">
+          <div class="summary-item">
+            <div class="label">Total Customers</div>
+            <div class="value">{{ totalCustomers }}</div>
+          </div>
+          <div class="summary-item">
+            <div class="label">Total Cycles</div>
+            <div class="value">{{ cycleStats.length }}</div>
+          </div>
+          <div class="summary-item">
+            <div class="label">Departments</div>
+            <div class="value">{{ departmentStats.length }}</div>
+          </div>
+        </div>
+      </p-card>
+
+      <!-- Customers by Cycle -->
+      <p-card>
+        <ng-template pTemplate="header">
+          <div class="card-header">
+            <h2><i class="pi pi-calendar"></i> Customers by Cycle</h2>
+          </div>
+        </ng-template>
+        <p-table [value]="cycleStats" [tableStyle]="{ 'min-width': '100%' }" styleClass="p-datatable-sm">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Cycle Name</th>
+              <th>Total Customers</th>
+              <th>Active</th>
+              <th>Inactive</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-stat>
+            <tr>
+              <td><strong>{{ stat.cycle_name }}</strong></td>
+              <td>{{ stat.customer_count }}</td>
+              <td><p-tag [value]="stat.active_count.toString()" severity="success"></p-tag></td>
+              <td><p-tag [value]="stat.inactive_count.toString()" severity="secondary"></p-tag></td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="4" class="text-center">No cycle data available</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </p-card>
+
+      <!-- Customers by Status -->
+      <p-card>
+        <ng-template pTemplate="header">
+          <div class="card-header">
+            <h2><i class="pi pi-chart-bar"></i> Customers by Status</h2>
+          </div>
+        </ng-template>
+        <p-table [value]="statusStats" [tableStyle]="{ 'min-width': '100%' }" styleClass="p-datatable-sm">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Status</th>
+              <th>Count</th>
+              <th>Percentage</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-stat>
+            <tr>
+              <td>
+                <p-tag [value]="stat.status" [severity]="getStatusSeverity(stat.status)"></p-tag>
+              </td>
+              <td><strong>{{ stat.count }}</strong></td>
+              <td>
+                <div class="percentage-bar">
+                  <div class="bar" [style.width.%]="stat.percentage"></div>
+                  <span class="percentage-text">{{ stat.percentage }}%</span>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="3" class="text-center">No status data available</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </p-card>
+
+      <!-- Customers by Department -->
+      <p-card>
+        <ng-template pTemplate="header">
+          <div class="card-header">
+            <h2><i class="pi pi-users"></i> Customers by Department</h2>
+          </div>
+        </ng-template>
+        <p-table [value]="departmentStats" [tableStyle]="{ 'min-width': '100%' }" styleClass="p-datatable-sm" [paginator]="departmentStats.length > 10" [rows]="10">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Department</th>
+              <th>Customer Count</th>
+              <th>Avg. Salary</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-stat>
+            <tr>
+              <td><strong>{{ stat.department }}</strong></td>
+              <td>{{ stat.count }}</td>
+              <td>{{ stat.avg_salary | currency:'USD':'symbol':'1.0-0' }}</td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="3" class="text-center">No department data available</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </p-card>
+    </div>
+  }
+</div>

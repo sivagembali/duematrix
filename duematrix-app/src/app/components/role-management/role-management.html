@@ -1,0 +1,140 @@
+<div class="role-management-container">
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <p-card>
+    <div class="header-section">
+      <h2>Role Management</h2>
+      <button 
+        pButton 
+        label="Add Role" 
+        icon="pi pi-plus" 
+        class="p-button-success"
+        (click)="openCreateDialog()">
+      </button>
+    </div>
+
+    <p-table 
+      [value]="roles" 
+      [loading]="loading"
+      styleClass="p-datatable-gridlines"
+      [paginator]="true"
+      [rows]="10"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} roles"
+      [rowsPerPageOptions]="[10, 25, 50]">
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th>ID</th>
+          <th>Role Name</th>
+          <th>Description</th>
+          <th>Status</th>
+          <th>Created At</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="body" let-role>
+        <tr>
+          <td>{{ role.id }}</td>
+          <td><strong>{{ role.role_name }}</strong></td>
+          <td>{{ role.role_description || 'N/A' }}</td>
+          <td>
+            <p-tag 
+              [value]="role.is_active ? 'Active' : 'Inactive'" 
+              [severity]="getStatusSeverity(role.is_active)">
+            </p-tag>
+          </td>
+          <td>{{ role.created_at | date:'medium' }}</td>
+          <td>
+            <button 
+              pButton 
+              icon="pi pi-pencil" 
+              class="p-button-rounded p-button-text p-button-warning"
+              (click)="openEditDialog(role)"
+              pTooltip="Edit Role"
+              tooltipPosition="top">
+            </button>
+            <button 
+              pButton 
+              icon="pi pi-trash" 
+              class="p-button-rounded p-button-text p-button-danger"
+              (click)="confirmDelete(role)"
+              pTooltip="Delete Role"
+              tooltipPosition="top">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" style="text-align: center;">No roles found</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+
+  <!-- Create/Edit Dialog -->
+  <p-dialog 
+    [(visible)]="showDialog" 
+    [header]="dialogMode === 'create' ? 'Create New Role' : 'Edit Role'"
+    [modal]="true"
+    [style]="{width: '500px'}"
+    [draggable]="false"
+    [resizable]="false">
+    
+    <div class="dialog-content">
+      <div class="form-field">
+        <label for="roleName">Role Name *</label>
+        <input 
+          id="roleName"
+          type="text" 
+          pInputText 
+          [(ngModel)]="roleName"
+          placeholder="Enter role name"
+          class="w-full" />
+      </div>
+
+      <div class="form-field">
+        <label for="roleDescription">Description</label>
+        <textarea
+          id="roleDescription"
+          pInputText
+          [(ngModel)]="roleDescription"
+          placeholder="Enter role description"
+          rows="3"
+          class="w-full"
+          style="resize: vertical;">
+        </textarea>
+      </div>
+
+      <div class="form-field checkbox-field">
+        <label for="isActive">Active Status</label>
+        <input 
+          id="isActive"
+          type="checkbox"
+          [(ngModel)]="isActive" />
+        <span class="checkbox-label">{{ isActive ? 'Active' : 'Inactive' }}</span>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button 
+        pButton 
+        label="Cancel" 
+        icon="pi pi-times" 
+        class="p-button-text"
+        (click)="cancelDialog()">
+      </button>
+      <button 
+        pButton 
+        [label]="dialogMode === 'create' ? 'Create' : 'Update'" 
+        icon="pi pi-check" 
+        [loading]="loading"
+        (click)="saveRole()">
+      </button>
+    </ng-template>
+  </p-dialog>
+</div>

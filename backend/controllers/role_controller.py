@@ -120,6 +120,41 @@ def update_role(role_id):
         }), 500
 
 
+@role_bp.route('/roles/<int:role_id>', methods=['DELETE'])
+@jwt_required()
+def delete_role(role_id):
+    """Delete a role"""
+    try:
+        role = RoleMaster.query.get_or_404(role_id)
+        
+        # Check if role is assigned to any users
+        active_mappings = RoleMapping.query.filter_by(
+            role_id=role_id,
+            is_active=True
+        ).count()
+        
+        if active_mappings > 0:
+            return jsonify({
+                'success': False,
+                'error': f'Cannot delete role. It is assigned to {active_mappings} user(s)'
+            }), 400
+        
+        db.session.delete(role)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Role deleted successfully'
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
 @role_bp.route('/role-mappings', methods=['POST'])
 @jwt_required()
 def assign_role_to_user():

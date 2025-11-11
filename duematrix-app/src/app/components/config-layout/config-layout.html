@@ -1,0 +1,28 @@
+<div class="config-layout">
+  <aside class="config-sidebar">
+    <div class="sidebar-header">
+      <i class="pi pi-cog"></i>
+      <h2>Configuration</h2>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <ul class="nav-list">
+        @for (item of menuItems; track item.route) {
+          <li class="nav-item">
+            <a 
+              [routerLink]="item.route" 
+              routerLinkActive="active"
+              class="nav-link">
+              <i [class]="item.icon"></i>
+              <span>{{ item.label }}</span>
+            </a>
+          </li>
+        }
+      </ul>
+    </nav>
+  </aside>
+
+  <main class="config-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>
