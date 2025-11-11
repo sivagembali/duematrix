@@ -18,7 +18,15 @@ class Config:
     if DATABASE_URL:
         # Render/Production: Use DATABASE_URL directly
         # Fix postgres:// to postgresql:// for SQLAlchemy compatibility
-        SQLALCHEMY_DATABASE_URI = DATABASE_URL.replace('postgres://', 'postgresql://')
+        # Ensure SSL mode is enabled for hosted Postgres (Render)
+        uri = DATABASE_URL.replace('postgres://', 'postgresql://')
+        # If sslmode isn't specified, append sslmode=require
+        if 'sslmode' not in uri:
+            if '?' in uri:
+                uri = uri + '&sslmode=require'
+            else:
+                uri = uri + '?sslmode=require'
+        SQLALCHEMY_DATABASE_URI = uri
     else:
         # Local development: Build from components
         DB_TYPE = os.getenv('DB_TYPE', 'postgresql')
