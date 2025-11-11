@@ -18,7 +18,14 @@ def create_app(config_name=None):
     
     # Initialize extensions
     db.init_app(app)
-    CORS(app, resources={r"/api/*": {"origins": app.config['CORS_ORIGINS']}})
+    CORS(app, resources={
+        r"/api/*": {
+            "origins": app.config['CORS_ORIGINS'],
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
+            "supports_credentials": True
+        }
+    })
     Migrate(app, db)
     JWTManager(app)
     Bcrypt(app)
