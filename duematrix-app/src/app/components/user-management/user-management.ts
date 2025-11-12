@@ -48,9 +48,11 @@ export class UserManagementComponent implements OnInit {
   
   showCreateUserDialog = signal(false);
   showAssignRoleDialog = signal(false);
+  showChangePasswordDialog = signal(false);
   
   createUserForm!: FormGroup;
   assignRoleForm!: FormGroup;
+  changePasswordForm!: FormGroup;
   selectedUser: User | null = null;
 
   constructor(
@@ -80,6 +82,11 @@ export class UserManagementComponent implements OnInit {
     this.assignRoleForm = this.fb.group({
       role_id: [null, [Validators.required]]
     });
+
+    this.changePasswordForm = this.fb.group({
+      new_password: ['', [Validators.required, Validators.minLength(8)]],
+      confirm_password: ['', [Validators.required]]
+    }, { validators: this.passwordMatchValidator });
   }
 
   loadUsers(): void {
@@ -247,6 +254,65 @@ export class UserManagementComponent implements OnInit {
         });
       }
     });
+  }
+
+  openChangePasswordDialog(user: User): void {
+    this.selectedUser = user;
+    this.changePasswordForm.reset();
+    this.showChangePasswordDialog.set(true);
+  }
+
+  closeChangePasswordDialog(): void {
+    this.showChangePasswordDialog.set(false);
+    this.selectedUser = null;
+  }
+
+  changePassword(): void {
+    if (this.changePasswordForm.invalid || !this.selectedUser) {
+      this.markFormGroupTouched(this.changePasswordForm);
+      return;
+    }
+
+    if (this.changePasswordForm.value.new_password !== this.changePasswordForm.value.confirm_password) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Passwords do not match'
+      });
+      return;
+    }
+
+    this.loading.set(true);
+    this.userService.changeUserPassword(this.selectedUser.id, {
+      new_password: this.changePasswordForm.value.new_password
+    }).subscribe({
+      next: (response: any) => {
+        if (response.success) {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Password changed successfully'
+          });
+          this.closeChangePasswordDialog();
+        }
+        this.loading.set(false);
+      },
+      error: (error: any) => {
+        console.error('Error changing password', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: error.error?.error || 'Failed to change password'
+        });
+        this.loading.set(false);
+      }
+    });
+  }
+
+  passwordMatchValidator(formGroup: FormGroup): { [key: string]: boolean } | null {
+    const password = formGroup.get('new_password')?.value;
+    const confirmPassword = formGroup.get('confirm_password')?.value;
+    return password === confirmPassword ? null : { passwordMismatch: true };
   }
 
   private markFormGroupTouched(formGroup: FormGroup): void {

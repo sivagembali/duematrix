@@ -103,4 +103,15 @@ export class UserManagementService {
       { headers: this.getHeaders() }
     );
   }
+
+  /**
+   * Change user password
+   */
+  changeUserPassword(userId: number, data: { new_password: string }): Observable<ApiResponse<string>> {
+    return this.http.patch<ApiResponse<string>>(
+      `${this.apiUrl}/auth/users/${userId}/password`,
+      data,
+      { headers: this.getHeaders() }
+    );
+  }
 }

@@ -417,3 +417,51 @@ def update_user_status(user_id):
             'success': False,
             'error': str(e)
         }), 500
+
+
+@auth_bp.route('/users/<int:user_id>/password', methods=['PATCH'])
+@jwt_required()
+def change_user_password(user_id):
+    """Change another user's password (admin only)"""
+    try:
+        current_user_id = int(get_jwt_identity())
+        
+        # Prevent users from changing their own password through this endpoint
+        if current_user_id == user_id:
+            return jsonify({
+                'success': False,
+                'error': 'Use /change-password endpoint to change your own password'
+            }), 400
+        
+        user = User.query.get_or_404(user_id)
+        data = request.get_json()
+        
+        if not data or 'new_password' not in data:
+            return jsonify({
+                'success': False,
+                'error': 'new_password is required'
+            }), 400
+        
+        # Validate new password
+        is_valid, message = validate_password(data['new_password'])
+        if not is_valid:
+            return jsonify({
+                'success': False,
+                'error': message
+            }), 400
+        
+        # Update password
+        user.set_password(data['new_password'])
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Password changed successfully'
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500

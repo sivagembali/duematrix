@@ -67,6 +67,13 @@
               pTooltip="Assign Role"
               (click)="openAssignRoleDialog(user)"
             ></button>
+            <button 
+              pButton 
+              icon="pi pi-key" 
+              class="p-button-rounded p-button-text p-button-warning"
+              pTooltip="Change Password"
+              (click)="openChangePasswordDialog(user)"
+            ></button>
           </td>
         </tr>
       </ng-template>
@@ -233,6 +240,78 @@
           pButton 
           type="submit" 
           label="Assign Role"
+          [loading]="loading()"
+        ></button>
+      </div>
+    </form>
+  </p-dialog>
+
+  <!-- Change Password Dialog -->
+  <p-dialog 
+    [(visible)]="showChangePasswordDialog" 
+    header="Change Password" 
+    [modal]="true"
+    [style]="{width: '450px'}"
+    [dismissableMask]="true">
+    
+    <form [formGroup]="changePasswordForm" (ngSubmit)="changePassword()">
+      @if (selectedUser) {
+        <div class="dialog-info">
+          <p><strong>User:</strong> {{ selectedUser.username }} ({{ selectedUser.email }})</p>
+        </div>
+      }
+
+      <div class="form-field">
+        <label for="new_password">New Password *</label>
+        <p-password
+          id="new_password"
+          formControlName="new_password"
+          placeholder="Enter new password"
+          [toggleMask]="true"
+          [feedback]="true"
+          styleClass="w-full"
+        ></p-password>
+        @if (changePasswordForm.get('new_password')?.invalid && changePasswordForm.get('new_password')?.touched) {
+          <small class="error-text">
+            @if (changePasswordForm.get('new_password')?.errors?.['required']) {
+              Password is required
+            } @else if (changePasswordForm.get('new_password')?.errors?.['minlength']) {
+              Password must be at least 8 characters
+            }
+          </small>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="confirm_password">Confirm Password *</label>
+        <p-password
+          id="confirm_password"
+          formControlName="confirm_password"
+          placeholder="Confirm new password"
+          [toggleMask]="true"
+          [feedback]="false"
+          styleClass="w-full"
+        ></p-password>
+        @if (changePasswordForm.get('confirm_password')?.invalid && changePasswordForm.get('confirm_password')?.touched) {
+          <small class="error-text">Please confirm the password</small>
+        }
+        @if (changePasswordForm.errors?.['passwordMismatch'] && changePasswordForm.get('confirm_password')?.touched) {
+          <small class="error-text">Passwords do not match</small>
+        }
+      </div>
+
+      <div class="dialog-footer">
+        <button 
+          pButton 
+          type="button" 
+          label="Cancel" 
+          class="p-button-text"
+          (click)="closeChangePasswordDialog()"
+        ></button>
+        <button 
+          pButton 
+          type="submit" 
+          label="Change Password"
           [loading]="loading()"
         ></button>
       </div>
