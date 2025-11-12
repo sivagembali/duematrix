@@ -304,3 +304,152 @@ def get_headers_by_role(role_id):
             'error': str(e)
         }), 500
 
+
+
+@header_bp.route('/headers/export', methods=['GET'])
+@jwt_required()
+def export_headers():
+    """Export headers to CSV"""
+    try:
+        import csv
+        from io import StringIO
+        from flask import make_response
+        
+        headers = ColumnHeader.query.all()
+        
+        # Create CSV in memory
+        si = StringIO()
+        writer = csv.writer(si)
+        
+        # Write header
+        writer.writerow(['id', 'col_header', 'col_label', 'is_editable', 'is_multi_select', 'col_width', 'display', 'default_display', 'is_frozen', 'display_order', 'role_id'])
+        
+        # Write data
+        for header in headers:
+            writer.writerow([
+                header.id,
+                header.col_header,
+                header.col_label,
+                header.is_editable,
+                header.is_multi_select,
+                header.col_width,
+                header.display,
+                header.default_display,
+                header.is_frozen,
+                header.display_order,
+                header.role_id
+            ])
+        
+        # Create response
+        output = make_response(si.getvalue())
+        output.headers["Content-Disposition"] = "attachment; filename=headers.csv"
+        output.headers["Content-type"] = "text/csv"
+        
+        return output
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@header_bp.route('/headers/import', methods=['POST'])
+@jwt_required()
+def import_headers():
+    """Import headers from CSV"""
+    try:
+        import csv
+        from io import StringIO
+        
+        if 'file' not in request.files:
+            return jsonify({
+                'success': False,
+                'error': 'No file provided'
+            }), 400
+        
+        file = request.files['file']
+        
+        if file.filename == '':
+            return jsonify({
+                'success': False,
+                'error': 'No file selected'
+            }), 400
+        
+        if not file.filename.endswith('.csv'):
+            return jsonify({
+                'success': False,
+                'error': 'Only CSV files are allowed'
+            }), 400
+        
+        # Read CSV
+        stream = StringIO(file.stream.read().decode("UTF8"), newline=None)
+        csv_reader = csv.DictReader(stream)
+        
+        created_count = 0
+        updated_count = 0
+        errors = []
+        
+        current_user_id = get_jwt_identity()
+        
+        for row_num, row in enumerate(csv_reader, start=2):
+            try:
+                # Check if header exists by col_header
+                existing_header = ColumnHeader.query.filter_by(col_header=row['col_header']).first()
+                
+                if existing_header:
+                    # Update existing header
+                    existing_header.col_label = row.get('col_label', existing_header.col_label)
+                    existing_header.is_editable = row.get('is_editable', 'True').lower() in ['true', '1', 'yes']
+                    existing_header.is_multi_select = row.get('is_multi_select', 'False').lower() in ['true', '1', 'yes']
+                    existing_header.col_width = int(row.get('col_width', existing_header.col_width))
+                    existing_header.display = row.get('display', 'True').lower() in ['true', '1', 'yes']
+                    existing_header.default_display = row.get('default_display', 'True').lower() in ['true', '1', 'yes']
+                    existing_header.is_frozen = row.get('is_frozen', 'False').lower() in ['true', '1', 'yes']
+                    existing_header.display_order = int(row.get('display_order', existing_header.display_order))
+                    existing_header.role_id = int(row['role_id']) if row.get('role_id') and row['role_id'] != '' else None
+                    existing_header.updated_by = current_user_id
+                    updated_count += 1
+                else:
+                    # Create new header
+                    if not row.get('col_header'):
+                        errors.append(f"Row {row_num}: col_header is required")
+                        continue
+                    
+                    new_header = ColumnHeader(
+                        col_header=row['col_header'],
+                        col_label=row.get('col_label', ''),
+                        is_editable=row.get('is_editable', 'True').lower() in ['true', '1', 'yes'],
+                        is_multi_select=row.get('is_multi_select', 'False').lower() in ['true', '1', 'yes'],
+                        col_width=int(row.get('col_width', 150)),
+                        display=row.get('display', 'True').lower() in ['true', '1', 'yes'],
+                        default_display=row.get('default_display', 'True').lower() in ['true', '1', 'yes'],
+                        is_frozen=row.get('is_frozen', 'False').lower() in ['true', '1', 'yes'],
+                        display_order=int(row.get('display_order', 0)),
+                        role_id=int(row['role_id']) if row.get('role_id') and row['role_id'] != '' else None,
+                        created_by=current_user_id,
+                        updated_by=current_user_id
+                    )
+                    db.session.add(new_header)
+                    created_count += 1
+                    
+            except Exception as e:
+                errors.append(f"Row {row_num}: {str(e)}")
+                continue
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Import completed: {created_count} created, {updated_count} updated',
+            'created': created_count,
+            'updated': updated_count,
+            'errors': errors
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500

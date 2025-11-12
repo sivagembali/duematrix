@@ -465,3 +465,146 @@ def change_user_password(user_id):
             'success': False,
             'error': str(e)
         }), 500
+
+
+@auth_bp.route('/users/export', methods=['GET'])
+@jwt_required()
+def export_users():
+    """Export users to CSV"""
+    try:
+        import csv
+        from io import StringIO
+        from flask import make_response
+        
+        users = User.query.all()
+        
+        # Create CSV in memory
+        si = StringIO()
+        writer = csv.writer(si)
+        
+        # Write header
+        writer.writerow(['id', 'username', 'email', 'first_name', 'last_name', 'role_id', 'is_active', 'is_verified', 'created_at'])
+        
+        # Write data
+        for user in users:
+            writer.writerow([
+                user.id,
+                user.username,
+                user.email,
+                user.first_name,
+                user.last_name,
+                user.role_id,
+                user.is_active,
+                user.is_verified,
+                user.created_at.isoformat() if user.created_at else ''
+            ])
+        
+        # Create response
+        output = make_response(si.getvalue())
+        output.headers["Content-Disposition"] = "attachment; filename=users.csv"
+        output.headers["Content-type"] = "text/csv"
+        
+        return output
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@auth_bp.route('/users/import', methods=['POST'])
+@jwt_required()
+def import_users():
+    """Import users from CSV"""
+    try:
+        import csv
+        from io import StringIO
+        
+        if 'file' not in request.files:
+            return jsonify({
+                'success': False,
+                'error': 'No file provided'
+            }), 400
+        
+        file = request.files['file']
+        
+        if file.filename == '':
+            return jsonify({
+                'success': False,
+                'error': 'No file selected'
+            }), 400
+        
+        if not file.filename.endswith('.csv'):
+            return jsonify({
+                'success': False,
+                'error': 'Only CSV files are allowed'
+            }), 400
+        
+        # Read CSV
+        stream = StringIO(file.stream.read().decode("UTF8"), newline=None)
+        csv_reader = csv.DictReader(stream)
+        
+        created_count = 0
+        updated_count = 0
+        errors = []
+        
+        for row_num, row in enumerate(csv_reader, start=2):
+            try:
+                # Check if user exists by email or username
+                existing_user = User.query.filter(
+                    (User.email == row['email']) | (User.username == row['username'])
+                ).first()
+                
+                if existing_user:
+                    # Update existing user
+                    existing_user.first_name = row.get('first_name', existing_user.first_name)
+                    existing_user.last_name = row.get('last_name', existing_user.last_name)
+                    existing_user.role_id = int(row['role_id']) if row.get('role_id') else existing_user.role_id
+                    existing_user.is_active = row.get('is_active', 'True').lower() in ['true', '1', 'yes']
+                    existing_user.is_verified = row.get('is_verified', 'False').lower() in ['true', '1', 'yes']
+                    updated_count += 1
+                else:
+                    # Create new user (requires password)
+                    if 'password' not in row or not row['password']:
+                        errors.append(f"Row {row_num}: New user requires password")
+                        continue
+                    
+                    # Validate required fields
+                    if not row.get('username') or not row.get('email'):
+                        errors.append(f"Row {row_num}: username and email are required")
+                        continue
+                    
+                    new_user = User(
+                        username=row['username'],
+                        email=row['email'],
+                        first_name=row.get('first_name', ''),
+                        last_name=row.get('last_name', ''),
+                        role_id=int(row['role_id']) if row.get('role_id') else None,
+                        is_active=row.get('is_active', 'True').lower() in ['true', '1', 'yes'],
+                        is_verified=row.get('is_verified', 'False').lower() in ['true', '1', 'yes']
+                    )
+                    new_user.set_password(row['password'])
+                    db.session.add(new_user)
+                    created_count += 1
+                    
+            except Exception as e:
+                errors.append(f"Row {row_num}: {str(e)}")
+                continue
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Import completed: {created_count} created, {updated_count} updated',
+            'created': created_count,
+            'updated': updated_count,
+            'errors': errors
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500

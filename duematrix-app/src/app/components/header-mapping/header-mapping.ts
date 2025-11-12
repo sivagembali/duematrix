@@ -247,4 +247,76 @@ export class HeaderMappingComponent implements OnInit {
   getDisplaySeverity(display: boolean): any {
     return display ? 'success' : 'danger';
   }
+
+  downloadHeaders(): void {
+    this.headerService.exportHeaders().subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `headers_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Headers exported successfully'
+        });
+      },
+      error: (error: any) => {
+        console.error('Error exporting headers', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to export headers'
+        });
+      }
+    });
+  }
+
+  uploadHeaders(event: any): void {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.csv')) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Only CSV files are allowed'
+      });
+      return;
+    }
+
+    this.loading = true;
+    this.cdr.markForCheck();
+
+    this.headerService.importHeaders(file).subscribe({
+      next: (response: any) => {
+        if (response.success) {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: response.message
+          });
+          this.loadHeaders();
+        }
+        this.loading = false;
+        this.cdr.markForCheck();
+        // Reset file input
+        event.target.value = '';
+      },
+      error: (error: any) => {
+        console.error('Error importing headers', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: error.error?.error || 'Failed to import headers'
+        });
+        this.loading = false;
+        this.cdr.markForCheck();
+        event.target.value = '';
+      }
+    });
+  }
 }

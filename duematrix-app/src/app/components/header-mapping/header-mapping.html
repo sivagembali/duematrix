@@ -5,7 +5,36 @@
   <p-card>
     <div class="header-section">
       <h2>Header Mapping</h2>
-      <button pButton label="Add Header" icon="pi pi-plus" class="p-button-success" (click)="openCreate()"></button>
+      <div class="button-group">
+        <button 
+          pButton 
+          label="Download" 
+          icon="pi pi-download"
+          class="p-button-outlined p-button-secondary"
+          (click)="downloadHeaders()"
+        ></button>
+        <button 
+          pButton 
+          label="Upload" 
+          icon="pi pi-upload"
+          class="p-button-outlined p-button-secondary"
+          (click)="fileInput.click()"
+        ></button>
+        <input 
+          #fileInput
+          type="file"
+          accept=".csv"
+          style="display: none;"
+          (change)="uploadHeaders($event)"
+        />
+        <button 
+          pButton 
+          label="Add Header" 
+          icon="pi pi-plus" 
+          class="p-button-success" 
+          (click)="openCreate()"
+        ></button>
+      </div>
     </div>
 
     <p-table [value]="filteredHeaders" [loading]="loading" [paginator]="true" [rows]="10" styleClass="p-datatable-gridlines" [showCurrentPageReport]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} headers" [globalFilterFields]="['col_header', 'col_label']">

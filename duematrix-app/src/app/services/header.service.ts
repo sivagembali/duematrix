@@ -107,4 +107,24 @@ export class HeaderService {
   bulkCreateHeaders(headers: Partial<ColumnHeader>[]): Observable<any> {
     return this.http.post(`${this.apiUrl}/headers/bulk`, headers);
   }
+
+  /**
+   * Export headers to CSV
+   */
+  exportHeaders(): Observable<Blob> {
+    return this.http.get(
+      `${this.apiUrl}/headers/export`,
+      { responseType: 'blob' }
+    );
+  }
+
+  /**
+   * Import headers from CSV
+   */
+  importHeaders(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    return this.http.post(`${this.apiUrl}/headers/import`, formData);
+  }
 }
