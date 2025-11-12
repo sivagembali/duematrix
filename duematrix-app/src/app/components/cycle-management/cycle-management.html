@@ -1,0 +1,165 @@
+<div class="cycle-management-container">
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <p-card>
+    <div class="header-section">
+      <h2>Cycle Management</h2>
+      <button 
+        pButton 
+        label="Add Cycle" 
+        icon="pi pi-plus" 
+        class="p-button-success"
+        (click)="showAddDialog()">
+      </button>
+    </div>
+
+    <p-table 
+      [value]="cycles" 
+      [loading]="loading"
+      styleClass="p-datatable-gridlines"
+      [paginator]="true"
+      [rows]="10"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} cycles"
+      [rowsPerPageOptions]="[10, 25, 50]">
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th>ID</th>
+          <th>Cycle Name</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="body" let-cycle>
+        <tr>
+          <td>{{ cycle.id }}</td>
+          <td><strong>{{ cycle.cycle_name }}</strong></td>
+          <td>{{ cycle.start_date | date:'mediumDate' }}</td>
+          <td>{{ cycle.end_date | date:'mediumDate' }}</td>
+          <td>
+            <p-tag 
+              [value]="cycle.status || 'N/A'" 
+              [severity]="getStatusSeverity(cycle.status)">
+            </p-tag>
+          </td>
+          <td>
+            <button 
+              pButton 
+              icon="pi pi-pencil" 
+              class="p-button-rounded p-button-text p-button-warning"
+              (click)="editCycle(cycle)"
+              pTooltip="Edit Cycle"
+              tooltipPosition="top">
+            </button>
+            <button 
+              pButton 
+              icon="pi pi-trash" 
+              class="p-button-rounded p-button-text p-button-danger"
+              (click)="deleteCycle(cycle)"
+              pTooltip="Delete Cycle"
+              tooltipPosition="top">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" style="text-align: center;">No cycles found</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+
+  <!-- Create/Edit Dialog -->
+  <p-dialog 
+    [(visible)]="displayDialog" 
+    [header]="isEditMode ? 'Edit Cycle' : 'Add New Cycle'"
+    [modal]="true"
+    [style]="{width: '500px'}"
+    [draggable]="false"
+    [resizable]="false">
+    
+    <div class="form-container">
+      <div class="field">
+        <label for="cycle_name">Cycle Name *</label>
+        <input 
+          id="cycle_name"
+          type="text" 
+          pInputText 
+          [(ngModel)]="cycle.cycle_name"
+          placeholder="e.g., Q1-2025"
+          class="w-full" />
+      </div>
+
+      <div class="field">
+        <label for="start_date">Start Date</label>
+        <p-datepicker 
+          [inputId]="'start_date'"
+          [(ngModel)]="cycle.start_date"
+          dateFormat="yy-mm-dd"
+          [showIcon]="true"
+          [showButtonBar]="true"
+          [showOnFocus]="false"
+          [iconDisplay]="'input'"
+          view="date"
+          appendTo="body"
+          placeholder="Select start date"
+          styleClass="w-full">
+        </p-datepicker>
+      </div>
+
+      <div class="field">
+        <label for="end_date">End Date</label>
+        <p-datepicker 
+          [inputId]="'end_date'"
+          [(ngModel)]="cycle.end_date"
+          dateFormat="yy-mm-dd"
+          [showIcon]="true"
+          [showButtonBar]="true"
+          [showOnFocus]="false"
+          [iconDisplay]="'input'"
+          view="date"
+          appendTo="body"
+          placeholder="Select end date"
+          styleClass="w-full">
+        </p-datepicker>
+      </div>
+
+      <div class="field">
+        <label for="status">Status *</label>
+        <p-select
+          id="status"
+          [(ngModel)]="cycle.status"
+          [options]="statusOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select a status"
+          class="w-full">
+        </p-select>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button 
+        pButton 
+        label="Cancel" 
+        icon="pi pi-times" 
+        class="p-button-text"
+        (click)="hideDialog()">
+      </button>
+      <button 
+        pButton 
+        label="Save" 
+        icon="pi pi-check" 
+        class="p-button-success"
+        (click)="saveCycle()">
+      </button>
+    </ng-template>
+  </p-dialog>
+</div>

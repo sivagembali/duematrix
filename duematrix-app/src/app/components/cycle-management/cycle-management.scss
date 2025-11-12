@@ -1,0 +1,114 @@
+.cycle-management-container {
+  padding: 1rem;
+
+  ::ng-deep .p-card {
+    .p-card-body {
+      padding: 1.5rem;
+    }
+  }
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+
+  h2 {
+    margin: 0;
+    color: #333;
+    font-size: 1.5rem;
+  }
+}
+
+::ng-deep {
+  .p-datatable {
+    .p-datatable-header {
+      background: white;
+      border: none;
+      padding: 1rem;
+    }
+
+    .p-datatable-thead > tr > th {
+      background-color: #f9fafb;
+      color: #374151;
+      font-weight: 600;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #e5e7eb;
+      border-top: none;
+    }
+
+    .p-datatable-tbody > tr > td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .p-datatable-tbody > tr:hover {
+      background: #f9fafb;
+    }
+
+    .p-paginator {
+      background: white;
+      border: none;
+      border-top: 1px solid #e5e7eb;
+      padding: 1rem;
+    }
+  }
+
+  .p-button-rounded {
+    margin: 0 0.25rem;
+  }
+
+  .p-dialog {
+    .p-dialog-header {
+      background: #f9fafb;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .p-dialog-content {
+      padding: 1.5rem;
+      overflow: visible !important;
+    }
+  }
+
+  // Fix datepicker overlay in dialog - must be higher than dialog z-index
+  .p-datepicker-mask {
+    z-index: 1200 !important;
+  }
+
+  .p-datepicker {
+    z-index: 1200 !important;
+  }
+
+  .p-datepicker-panel {
+    z-index: 1200 !important;
+  }
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+      font-weight: 600;
+      color: #374151;
+      font-size: 0.875rem;
+    }
+
+    input,
+    p-datepicker,
+    p-select {
+      width: 100%;
+    }
+  }
+
+  .w-full {
+    width: 100%;
+  }
+}

@@ -7,6 +7,7 @@ from flask import Blueprint, jsonify, request, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import CustomerData, User, db, Cycle
 from sqlalchemy import or_, and_
+from datetime import datetime
 
 data_bp = Blueprint('data', __name__)
 
@@ -394,4 +395,165 @@ def get_cycles_public():
         return jsonify({
             'success': False,
             'message': f'Error retrieving public cycles: {str(e)}'
+        }), 500
+
+
+@data_bp.route('/cycles/<int:cycle_id>', methods=['GET'])
+@jwt_required()
+def get_cycle(cycle_id):
+    """Get a single cycle by ID"""
+    try:
+        cycle = Cycle.query.get_or_404(cycle_id)
+        return jsonify({
+            'success': True,
+            'data': cycle.to_dict()
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Error retrieving cycle: {str(e)}'
+        }), 404
+
+
+@data_bp.route('/cycles', methods=['POST'])
+@jwt_required()
+def create_cycle():
+    """Create a new cycle"""
+    try:
+        data = request.get_json()
+        
+        if not data or 'cycle_name' not in data:
+            return jsonify({
+                'success': False,
+                'message': 'cycle_name is required'
+            }), 400
+        
+        # Check if cycle_name already exists
+        existing = Cycle.query.filter_by(cycle_name=data['cycle_name']).first()
+        if existing:
+            return jsonify({
+                'success': False,
+                'message': 'Cycle name already exists'
+            }), 409
+        
+        # Parse dates if provided
+        start_date = None
+        end_date = None
+        
+        if 'start_date' in data and data['start_date']:
+            start_date = datetime.fromisoformat(data['start_date'].replace('Z', '')).date()
+        if 'end_date' in data and data['end_date']:
+            end_date = datetime.fromisoformat(data['end_date'].replace('Z', '')).date()
+        
+        cycle = Cycle(
+            cycle_name=data['cycle_name'],
+            start_date=start_date,
+            end_date=end_date,
+            status=data.get('status', 'active')
+        )
+        
+        db.session.add(cycle)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Cycle created successfully',
+            'data': cycle.to_dict()
+        }), 201
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'Error creating cycle: {str(e)}'
+        }), 500
+
+
+@data_bp.route('/cycles/<int:cycle_id>', methods=['PUT'])
+@jwt_required()
+def update_cycle(cycle_id):
+    """Update an existing cycle"""
+    try:
+        cycle = Cycle.query.get_or_404(cycle_id)
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({
+                'success': False,
+                'message': 'No data provided'
+            }), 400
+        
+        # Check if new cycle_name conflicts with another cycle
+        if 'cycle_name' in data and data['cycle_name'] != cycle.cycle_name:
+            existing = Cycle.query.filter_by(cycle_name=data['cycle_name']).first()
+            if existing:
+                return jsonify({
+                    'success': False,
+                    'message': 'Cycle name already exists'
+                }), 409
+            cycle.cycle_name = data['cycle_name']
+        
+        # Update dates if provided
+        if 'start_date' in data:
+            if data['start_date']:
+                cycle.start_date = datetime.fromisoformat(data['start_date'].replace('Z', '')).date()
+            else:
+                cycle.start_date = None
+        
+        if 'end_date' in data:
+            if data['end_date']:
+                cycle.end_date = datetime.fromisoformat(data['end_date'].replace('Z', '')).date()
+            else:
+                cycle.end_date = None
+        
+        if 'status' in data:
+            cycle.status = data['status']
+        
+        cycle.updated_at = datetime.utcnow()
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Cycle updated successfully',
+            'data': cycle.to_dict()
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'Error updating cycle: {str(e)}'
+        }), 500
+
+
+@data_bp.route('/cycles/<int:cycle_id>', methods=['DELETE'])
+@jwt_required()
+def delete_cycle(cycle_id):
+    """Delete a cycle"""
+    try:
+        cycle = Cycle.query.get_or_404(cycle_id)
+        
+        # Check if cycle is referenced by customer data
+        from models import CustomerData
+        customer_count = CustomerData.query.filter_by(cycle_name=cycle.cycle_name).count()
+        
+        if customer_count > 0:
+            return jsonify({
+                'success': False,
+                'message': f'Cannot delete cycle. It is referenced by {customer_count} customer records.'
+            }), 400
+        
+        db.session.delete(cycle)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Cycle deleted successfully'
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': f'Error deleting cycle: {str(e)}'
         }), 500

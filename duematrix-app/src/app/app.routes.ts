@@ -7,6 +7,7 @@ import { ReportsComponent } from './components/reports/reports';
 import { ConfigLayoutComponent } from './components/config-layout/config-layout';
 import { RoleManagementComponent } from './components/role-management/role-management';
 import { HeaderMappingComponent } from './components/header-mapping/header-mapping';
+import { CycleManagementComponent } from './components/cycle-management/cycle-management';
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
 
@@ -33,8 +34,9 @@ export const routes: Routes = [
         children: [
           { path: '', redirectTo: 'users', pathMatch: 'full' },
           { path: 'users', component: UserManagementComponent },
-          { path: 'roles', component: RoleManagementComponent }
-          ,{ path: 'headers', component: HeaderMappingComponent }
+          { path: 'roles', component: RoleManagementComponent },
+          { path: 'headers', component: HeaderMappingComponent },
+          { path: 'cycles', component: CycleManagementComponent }
         ]
       }
     ]

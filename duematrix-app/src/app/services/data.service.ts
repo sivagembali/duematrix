@@ -52,6 +52,27 @@ export class DataService {
   }
 
   /**
+   * Create a new cycle
+   */
+  createCycle(cycleData: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/cycles`, cycleData);
+  }
+
+  /**
+   * Update an existing cycle
+   */
+  updateCycle(id: number, cycleData: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/cycles/${id}`, cycleData);
+  }
+
+  /**
+   * Delete a cycle
+   */
+  deleteCycle(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/cycles/${id}`);
+  }
+
+  /**
    * Get a single customer data record by ID
    */
   getCustomerDataById(id: number): Observable<SingleCustomerDataResponse> {
