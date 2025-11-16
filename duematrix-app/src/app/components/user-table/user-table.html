@@ -2,11 +2,25 @@
 
 <div class="card">
   <div class="table-info">
-    <p><strong>Total Records:</strong> {{ dataset.length }}</p>
+  <div style="display:flex; align-items:center; gap:0.75rem;">
+      <!-- Cycle selector first, then Total Records -->
+      <div class="cycle-selector-inline" style="display:inline-flex; align-items:center;">
+        <label for="cycleSelect" style="margin-right:0.5rem;">Cycle:</label>
+        <select id="cycleSelect" [(ngModel)]="selectedCycle" (change)="onCycleChange(selectedCycle)">
+          @if (cycles.length === 0) {
+            <option value="">Loading...</option>
+          }
+          @for (c of cycles; track c.id) {
+            <option [value]="c.cycle_name">{{ c.cycle_name }}</option>
+          }
+        </select>
+      </div>
+      <strong style="margin-left:0.5rem;">Total Records:</strong>
+      <span>{{ dataset.length }}</span>
+  </div>
     <p><strong>Filtered Records:</strong> {{ filteredDataset.length }}</p>
     <p><strong>Edited Records:</strong> <span [class.has-changes]="editedRecords.size > 0">{{ editedRecords.size }}</span></p>
-    <p><strong>Total Columns:</strong> {{ columnHeaders.length }}</p>
-    <p><strong>Displayed Columns:</strong> {{ displayedColumns.length }}</p>
+  <!-- Removed display of total/displayed column counts per request -->
     @if (loading) {
       <p><strong>Status:</strong> <span style="color: orange;">Loading data from API...</span></p>
     }

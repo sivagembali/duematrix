@@ -23,6 +23,9 @@ import { firstValueFrom, Subscription } from 'rxjs';
 })
 export class UserTable implements OnInit, OnDestroy {
   dataset: DataRow[] = [];
+  // cycles for dropdown
+  cycles: any[] = [];
+  selectedCycle: string = '';
   columnHeaders: ColumnHeader[] = [];
   displayedColumns: ColumnHeader[] = [];
   frozenColumns: ColumnHeader[] = []; // Columns with is_frozen = true
@@ -81,6 +84,27 @@ export class UserTable implements OnInit, OnDestroy {
         this.dataset = [];
         this.filteredDataset = [];
         this.totalRecords = 0;
+      }
+    });
+
+    // Load cycles so the selector can display options locally
+    this.cycleService.loadCycles().subscribe({
+      next: (res) => {
+        const data = (res && (res as any).data) ? (res as any).data : (Array.isArray(res) ? res : []);
+        this.cycles = data || [];
+
+        // If service already has a selected cycle, use it; otherwise auto-select the first cycle
+        const current = this.cycleService.getSelectedCycle();
+        if (current) {
+          this.selectedCycle = current;
+        } else if (this.cycles.length > 0) {
+          this.selectedCycle = this.cycles[0].cycle_name;
+          // publish selected cycle so other components receive it
+          this.cycleService.setSelectedCycle(this.selectedCycle);
+        }
+      },
+      error: (err) => {
+        console.error('[UserTable] Error loading cycles for selector:', err);
       }
     });
   }
@@ -191,6 +215,11 @@ export class UserTable implements OnInit, OnDestroy {
     if (this.cycleSubscription) {
       this.cycleSubscription.unsubscribe();
     }
+  }
+
+  onCycleChange(cycle: string) {
+    this.selectedCycle = cycle;
+    this.cycleService.setSelectedCycle(cycle);
   }
 
   // Transform CustomerData from API to DataRow format
