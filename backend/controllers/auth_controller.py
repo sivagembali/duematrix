@@ -1,11 +1,12 @@
 from flask import Blueprint, request, jsonify
-from models import db, User
+from models import db, User, Session
 from flask_jwt_extended import (
-    create_access_token, 
+    create_access_token,
     create_refresh_token,
-    jwt_required, 
+    jwt_required,
     get_jwt_identity,
-    get_jwt
+    get_jwt,
+    decode_token
 )
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
@@ -88,10 +89,31 @@ def register():
         db.session.add(user)
         db.session.commit()
         
+        # Detect existing active sessions for this user before issuing new tokens
+        try:
+            existing_sessions = Session.query.filter_by(user_id=user.id, revoked=False).all()
+        except Exception:
+            existing_sessions = []
+
+        force = bool(data.get('force', False)) if isinstance(data, dict) else False
+        if existing_sessions and not force:
+            sessions_info = [s.to_dict() for s in existing_sessions]
+            return jsonify({
+                'success': False,
+                'error': 'Existing active session(s) detected',
+                'existing_sessions': sessions_info
+            }), 409
+
+        # If force is true, revoke other sessions before continuing
+        if existing_sessions and force:
+            for s in existing_sessions:
+                s.revoked = True
+            db.session.commit()
+
         # Create tokens (convert user.id to string for JWT)
         access_token = create_access_token(identity=str(user.id))
         refresh_token = create_refresh_token(identity=str(user.id))
-        
+
         return jsonify({
             'success': True,
             'message': 'User registered successfully',
@@ -164,10 +186,49 @@ def login():
         user.last_login = datetime.utcnow()
         db.session.commit()
         
+        # Detect existing active sessions for this user before issuing new tokens
+        try:
+            existing_sessions = Session.query.filter_by(user_id=user.id, revoked=False).all()
+        except Exception as e:
+            print(f'Warning: could not query sessions: {str(e)}')
+            existing_sessions = []
+
+        force = bool(data.get('force', False)) if isinstance(data, dict) else False
+        if existing_sessions and not force:
+            sessions_info = [s.to_dict() for s in existing_sessions]
+            return jsonify({
+                'success': False,
+                'error': 'Existing active session(s) detected',
+                'existing_sessions': sessions_info
+            }), 409
+
+        # If force is true, revoke other sessions before continuing
+        if existing_sessions and force:
+            for s in existing_sessions:
+                s.revoked = True
+            db.session.commit()
+        
         # Create tokens (convert user.id to string for JWT)
         access_token = create_access_token(identity=str(user.id))
         refresh_token = create_refresh_token(identity=str(user.id))
         
+        # Persist session record for this login
+        try:
+            decoded = decode_token(access_token)
+            jti = decoded.get('jti')
+            sess = Session(
+                user_id=user.id,
+                jti=jti,
+                user_agent=request.headers.get('User-Agent'),
+                ip_address=request.remote_addr
+            )
+            db.session.add(sess)
+            db.session.commit()
+        except Exception as e:
+            # If session persistence fails, log it but continue to return tokens
+            db.session.rollback()
+            print('Warning: could not persist session record:', str(e))
+
         # Get user data with role information
         user_dict = user.to_dict()
         
@@ -333,11 +394,25 @@ def change_password():
 @jwt_required()
 def logout():
     """Logout user (client should delete tokens)"""
-    # In a production app, you might want to blacklist the token
-    return jsonify({
-        'success': True,
-        'message': 'Logout successful'
-    }), 200
+    try:
+        # Mark the session (by jti) revoked so token is blocked
+        jti = get_jwt().get('jti')
+        if jti:
+            sess = Session.query.filter_by(jti=jti).first()
+            if sess:
+                sess.revoked = True
+                db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Logout successful'
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 
 @auth_bp.route('/users', methods=['GET'])

@@ -9,5 +9,6 @@ from .user_model import User
 from .role_model import RoleMaster, RoleMapping
 from .customer_data_model import CustomerData
 from .cycle_model import Cycle
+from .session_model import Session
 
-__all__ = ['db', 'ColumnHeader', 'User', 'RoleMaster', 'RoleMapping', 'CustomerData', 'Cycle']
+__all__ = ['db', 'ColumnHeader', 'User', 'RoleMaster', 'RoleMapping', 'CustomerData', 'Cycle', 'Session']

@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CardModule } from 'primeng/card';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
@@ -16,6 +19,7 @@ import { AuthService } from '../../services/auth.service';
     CommonModule,
     ReactiveFormsModule,
     CardModule,
+    ConfirmDialogModule,
     InputTextModule,
     PasswordModule,
     ButtonModule,
@@ -23,18 +27,23 @@ import { AuthService } from '../../services/auth.service';
     MessageModule
   ],
   templateUrl: './login.html',
-  styleUrl: './login.scss'
+  styleUrl: './login.scss',
+  providers: [ConfirmationService, MessageService]
 })
 export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
   loading = signal(false);
   errorMessage = signal<string | null>(null);
   showPassword = signal(false);
+  // store pending credentials when confirmation is required
+  private pendingCredentials: any = null;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router
+    , private confirmationService: ConfirmationService,
+    private messageService: MessageService
   ) {}
 
   ngOnInit(): void {
@@ -92,7 +101,40 @@ export class LoginComponent implements OnInit {
         this.loading.set(false);
         console.error('Login error', error);
         
-        if (error.error?.error) {
+        // If backend reports existing_sessions, prompt to revoke other sessions
+        if (error.status === 409 && error.error?.existing_sessions) {
+          // store credentials for retry
+          this.pendingCredentials = { username: trimmedUsername, password: trimmedPassword };
+          this.confirmationService.confirm({
+            message: 'You are already logged in on another device or browser. Would you like to end that session and continue here?',
+            header: 'Already Logged In',
+            icon: 'pi pi-info-circle',
+            acceptLabel: 'Yes, Continue Here',
+            rejectLabel: 'Cancel',
+            acceptButtonStyleClass: 'p-button-success',
+            rejectButtonStyleClass: 'p-button-text',
+            accept: () => {
+              // retry login with force=true
+              this.loading.set(true);
+              this.authService.login({ ...this.pendingCredentials, force: true }).subscribe({
+                next: (resp) => {
+                  this.loading.set(false);
+                  if (resp.success) {
+                    if (rememberMe) {
+                      localStorage.setItem('rememberedUsername', trimmedUsername);
+                      localStorage.setItem('rememberMe', 'true');
+                    }
+                    this.router.navigate(['/dashboard']);
+                  }
+                },
+                error: (err2) => {
+                  this.loading.set(false);
+                  this.messageService.add({severity: 'error', summary: 'Login Failed', detail: err2.error?.error || 'Failed to login after revoking sessions'});
+                }
+              });
+            }
+          });
+        } else if (error.error?.error) {
           this.errorMessage.set(error.error.error);
         } else if (error.status === 0) {
           this.errorMessage.set('Cannot connect to server. Please ensure the backend is running.');

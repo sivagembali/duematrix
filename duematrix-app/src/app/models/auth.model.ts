@@ -2,6 +2,7 @@ export interface LoginRequest {
   username?: string;
   email?: string;
   password: string;
+  force?: boolean; // optional flag to force logout other sessions
 }
 
 export interface LoginResponse {

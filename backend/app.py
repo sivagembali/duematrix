@@ -27,8 +27,24 @@ def create_app(config_name=None):
         }
     })
     Migrate(app, db)
-    JWTManager(app)
+    # Initialize JWT and Bcrypt
+    jwt = JWTManager(app)
     Bcrypt(app)
+
+    # Token blocklist check - map JWT jti to Session.revoked
+    from models import Session
+
+    @jwt.token_in_blocklist_loader
+    def check_if_token_revoked(jwt_header, jwt_payload):
+        try:
+            jti = jwt_payload.get('jti')
+            if not jti:
+                return True
+            sess = Session.query.filter_by(jti=jti).first()
+            # If session does not exist or is revoked, treat token as revoked
+            return (sess is None) or sess.revoked
+        except Exception:
+            return True
     
     # Register blueprints
     from controllers.header_controller import header_bp
