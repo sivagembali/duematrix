@@ -67,6 +67,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       if (event.url === '/dashboard' || event.url.startsWith('/dashboard')) {
         console.log('[Dashboard] Navigated to dashboard, reloading data');
         this.loadDashboardData();
+          // ensure header active classes update immediately
+          this.cdr.detectChanges();
       }
     });
   }
@@ -155,6 +157,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
   onCycleChange(cycle: string) {
     this.selectedCycle = cycle;
     this.cycleService.setSelectedCycle(cycle);
+  }
+
+  /**
+   * Check if a route is active. Uses the Router.isActive helper to determine
+   * whether the provided path matches the current url. This is used by the
+   * template to apply the active-nav-link class reliably.
+   */
+  isActive(path: string, exact: boolean = false): boolean {
+    try {
+      return this.router.isActive(path, exact);
+    } catch (e) {
+      // In case path format is unexpected, gracefully return false
+      return false;
+    }
   }
 
   isAdmin(): boolean {

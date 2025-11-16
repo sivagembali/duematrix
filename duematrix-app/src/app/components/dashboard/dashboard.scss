@@ -101,19 +101,37 @@
     ::ng-deep .p-button {
       &.p-button-text {
         color: white;
+        position: relative;
+        transition: all var(--transition-base);
 
         &:hover {
-          background-color: rgba(255, 255, 255, 0.1);
+          background-color: rgba(255, 255, 255, 0.15);
+        }
+        
+        &.active-nav-link {
+          background-color: rgba(255, 255, 255, 0.2);
+          font-weight: 600;
+          
+          &::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: white;
+            border-radius: 2px 2px 0 0;
+          }
         }
       }
 
       &.p-button-outlined {
         background-color: transparent;
-        border-color: white;
+        border-color: rgba(255, 255, 255, 0.8);
         color: white;
 
         &:hover {
-          background-color: rgba(255, 255, 255, 0.1);
+          background-color: rgba(255, 255, 255, 0.15);
           border-color: white;
         }
       }
